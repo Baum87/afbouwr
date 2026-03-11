@@ -3,91 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Systeemplafond Rekenmachine</title>
-  <link rel="stylesheet" href="style.css" />
-  <style>
-    /* ── Compacte knoppen (niet full-width) ── */
-    .btn-group-compact {
-      display: flex;
-      gap: 10px;
-      width: fit-content;
-      margin-top: 4px;
-    }
-    .btn-group-compact .btn {
-      flex: none;
-      height: 38px;
-      padding: 0 20px;
-      border: 1.5px solid var(--border);
-      background: white;
-      color: var(--ink);
-      font-size: 14px;
-      min-width: 130px;
-    }
-    /* Actief = groen (overschrijft de zwarte .button-group .btn.active) */
-    .btn-group-compact .btn.active {
-      background: var(--accent);
-      color: white;
-      border-color: var(--accent);
-    }
-    .btn-group-compact .btn:hover:not(.active) {
-      border-color: var(--border-2);
-    }
-
-    /* ── Invoergrid: omschrijving + radio + oppervlakte + omtrek op 1 rij ── */
-    .invoer-rij {
-      display: grid;
-      grid-template-columns: 1fr auto 1fr 1fr;
-      gap: 14px;
-      align-items: start;
-    }
-
-    /* Radio's: gewone rondjes, strak naast elkaar */
-    .radio-rij {
-      display: flex;
-      flex-direction: column;
-      gap: 7px;
-      padding-top: 2px;
-    }
-    .radio-rij label {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      font-size: 13px;
-      color: var(--ink);
-      cursor: pointer;
-      white-space: nowrap;
-    }
-    .radio-rij input[type="radio"] {
-      width: 15px;
-      height: 15px;
-      accent-color: var(--accent);
-      cursor: pointer;
-      flex-shrink: 0;
-    }
-
-    /* Berekend m² veld — compacter */
-    #berekende-sqm-group { margin-top: 0; }
-
-    @media (max-width: 700px) {
-      .invoer-rij { grid-template-columns: 1fr 1fr; }
-      .btn-group-compact { width: 100%; }
-      .btn-group-compact .btn { flex: 1; min-width: 0; }
-    }
-    @media (max-width: 480px) {
-      .invoer-rij { grid-template-columns: 1fr; }
-    }
-  </style>
+  <title>Systeemplafond Rekenmachine — Afbouwr</title>
+  <link rel="stylesheet" href="afbouwr/style.css?v=3.3" />
 </head>
 <body class="has-nav">
 
-  <!-- ── NAVIGATIE ── -->
-  <nav class="nav">
-    <a href="/" class="nav-logo">
-      <span class="nav-logo-dot"></span>
-      Afbouwr
-    </a>
-    <a href="/" class="nav-back">← Alle calculators</a>
-  </nav>
+  <site-nav back="true"></site-nav>
 
   <div class="app-wrapper">
 
@@ -96,9 +17,9 @@
       <div class="header-inner">
         <div class="brand">
           <span class="brand-icon">🔲</span>
-          <div>
+          <div class="brand-text">
+            <span class="brand-eyebrow">Materiaalcalculator</span>
             <h1>Systeemplafond</h1>
-            <p class="brand-sub">Materiaalcalculator</p>
           </div>
         </div>
         <div class="header-rechts">
@@ -120,23 +41,23 @@
         <div class="form-grid">
 
           <!-- Systeemtype -->
-          <div class="form-group" style="grid-column: 1 / -1;">
+          <div class="form-group form-group-span">
             <label>Systeemtype</label>
             <div class="btn-group-compact">
-              <button class="btn btn-system" data-system="600x600">600×600 systeem</button>
-              <button class="btn btn-system" data-system="600x1200">600×1200 systeem</button>
+              <button class="btn" data-system="600x600">600×600 systeem</button>
+              <button class="btn" data-system="600x1200">600×1200 systeem</button>
             </div>
           </div>
 
           <!-- Kleur profielen -->
-          <div class="form-group" style="grid-column: 1 / -1;">
+          <div class="form-group form-group-span">
             <label>Kleur profielen &amp; hoeklijn</label>
             <div class="btn-group-compact">
-              <button class="btn btn-kleur active" data-kleur="wit">
-                <span style="display:inline-block;width:11px;height:11px;border-radius:2px;background:#fff;border:1.5px solid #CECCBF;vertical-align:middle;margin-right:6px;"></span>Wit
+              <button class="btn active" data-kleur="wit">
+                <span class="kleur-swatch kleur-swatch-wit"></span>Wit
               </button>
-              <button class="btn btn-kleur" data-kleur="zwart">
-                <span style="display:inline-block;width:11px;height:11px;border-radius:2px;background:#1C2B3A;border:1.5px solid #1C2B3A;vertical-align:middle;margin-right:6px;"></span>Zwart
+              <button class="btn" data-kleur="zwart">
+                <span class="kleur-swatch kleur-swatch-zwart"></span>Zwart
               </button>
             </div>
           </div>
@@ -144,14 +65,17 @@
         </div>
 
         <!-- ── Scheidingslijn ── -->
-        <div class="sectie-scheiding" style="margin: 20px 0 16px;">
+        <div class="sectie-scheiding sectie-scheiding-lg">
           <span>Materiaalspecificatie</span>
         </div>
 
         <!-- ── Plafondplaat merk/type ── -->
-        <div class="form-grid" style="margin-bottom: 16px;">
-          <div class="form-group" style="grid-column: 1 / -1;">
-            <label for="plaat-merk">Plafondplaat — merk / type <span style="font-weight:400;color:var(--ink-3);font-size:11px;text-transform:none;letter-spacing:0;">(optioneel)</span></label>
+        <div class="form-grid form-grid-mb">
+          <div class="form-group form-group-span">
+            <label for="plaat-merk">
+              Plafondplaat — merk / type
+              <span class="optioneel-tag">optioneel</span>
+            </label>
             <select id="plaat-merk">
               <option value="">— niet opgegeven —</option>
               <optgroup label="Armstrong">
@@ -172,11 +96,12 @@
                 <option value="anders">Anders (zelf invullen)</option>
               </optgroup>
             </select>
+            <!-- JS beheert display via style.display — geen hidden class -->
             <input
               type="text"
               id="plaat-merk-anders"
+              class="input-sub"
               placeholder="Typ merk / type…"
-              style="display:none; margin-top: 8px;"
               autocomplete="off"
             />
           </div>
@@ -191,7 +116,7 @@
             <input type="text" id="ruimte-naam" placeholder="bijv. Kantoor, Gang" value="Ruimte 1" />
           </div>
 
-          <!-- Invoermethode: gewone radio's -->
+          <!-- Invoermethode -->
           <div class="form-group">
             <label>Invoermethode</label>
             <div class="radio-rij">
@@ -206,25 +131,23 @@
             </div>
           </div>
 
-          <!-- m² invoer -->
+          <!-- m² invoer — zichtbaar bij start, JS schakelt om -->
           <div class="form-group" id="sqm-input-group">
             <label for="vierkante-meters">Oppervlakte (m²)</label>
             <input type="number" id="vierkante-meters" min="0.1" step="0.5" placeholder="bijv. 20" />
           </div>
 
-          <!-- Lengte invoer (verborgen) -->
+          <!-- L×B invoer — JS beheert display -->
           <div class="form-group" id="lengte-input-group" style="display:none;">
             <label for="lengte">Lengte (m)</label>
             <input type="number" id="lengte" min="0.1" step="0.1" placeholder="bijv. 5" />
           </div>
 
-          <!-- Breedte invoer (verborgen) -->
           <div class="form-group" id="breedte-input-group" style="display:none;">
             <label for="breedte">Breedte (m)</label>
             <input type="number" id="breedte" min="0.1" step="0.1" placeholder="bijv. 4" />
           </div>
 
-          <!-- Berekende m² (verborgen) -->
           <div class="form-group derived" id="berekende-sqm-group" style="display:none;">
             <label>Berekend</label>
             <div class="derived-value" id="berekende-sqm">—</div>
@@ -238,13 +161,13 @@
 
         </div>
 
-        <div class="card-actions" style="margin-top: 20px;">
+        <div class="card-actions">
           <button class="btn btn-primary" id="btn-toevoegen" disabled>+ Toevoegen aan lijst</button>
           <span class="calc-status" id="calc-status"></span>
         </div>
       </section>
 
-      <!-- ── RESULTATEN ── -->
+      <!-- ── RESULTATEN — JS beheert display via style.display ── -->
       <section class="results-section" id="results-section" style="display:none;">
 
         <!-- Ruimteoverzicht -->
@@ -280,7 +203,7 @@
                   <td class="totaal-label" colspan="4">Totaal</td>
                   <td class="totaal-val num" id="total-sqm">0</td>
                   <td class="totaal-val num" id="total-omtrek">0</td>
-                  <td colspan="6" style="text-align:center; color:var(--ink-3); font-size:12px; font-weight:400;">zie totaaloverzicht ↓</td>
+                  <td class="tfoot-hint" colspan="6">zie totaaloverzicht ↓</td>
                   <td></td>
                 </tr>
               </tfoot>
@@ -295,7 +218,7 @@
           </div>
           <div class="handmatig-invoer">
             <div class="handmatig-rij">
-              <div class="handmatig-label" style="width:80px;">Materiaal</div>
+              <div class="handmatig-label">Materiaal</div>
               <input type="text"   id="extra-omschrijving" placeholder="Omschrijving" class="input-breed" />
               <input type="number" id="extra-aantal"       placeholder="Aantal" min="0" step="1" />
               <input type="text"   id="extra-eenheid"      placeholder="Eenheid" />
@@ -327,7 +250,7 @@
               <tbody id="tbody-totalen"></tbody>
             </table>
           </div>
-          <div class="table-actions" style="padding: 14px 20px;">
+          <div class="table-actions">
             <button class="btn btn-outline btn-sm" onclick="window.print()">⎙ Afdrukken</button>
           </div>
         </div>
@@ -337,6 +260,9 @@
     </main>
   </div>
 
+  <site-footer></site-footer>
+
+  <script src="components.js?v=3.3"></script>
   <script src="app.js?v=20260305"></script>
 </body>
 </html>
