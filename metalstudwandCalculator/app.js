@@ -6,7 +6,7 @@
 'use strict';
 
 // ─── CONFIG ────────────────────────────────────────────────────────────────
-const API_URL = 'https://jouw-backend.render.com/api/metalstud-wand/bereken';
+const API_URL = 'https://jouw-backend.render.com/api/metalstud-wand/bereken'; // ← AANPASSEN
 const DEBOUNCE_DELAY = 500;
 const STORAGE_KEY = 'metalstud_wand_wanden';
 const STORAGE_KEY_PROJECT = 'metalstud_wand_project';
@@ -14,7 +14,16 @@ const STORAGE_KEY_EXTRA   = 'metalstud_wand_extra';
 const ISOLATIE_LENGTE = 1350; // mm — vast
 const ISOLATIE_BREEDTE = 600; // mm — vast
 
+/** Wand-type configuratie — eenvoudig uit te breiden
+ *
+ *  Naamgeving sleutel: gebruik underscores ipv punten/spaties
+ *  isolatie: false = geen, 'A' = 1 laag, 'AA' = 2 lagen
+ *  max_isolatie_dikte: maximale isolatiedikte in mm (beperking door profielbreedte)
+ *  schroeven: [ { laag, lengte, afstand_lengte } ]
+ */
 const WAND_TYPES = {
+
+  // ── Bestaande types ───────────────────────────────────────────────────────
   MS75_1_50_1: {
     label: 'MS75 1.50.1', dikte: 75,
     gips_links: 1, profiel_breedte: 50, gips_rechts: 1,
@@ -48,7 +57,7 @@ const WAND_TYPES = {
     schroeven: [
       { laag: 1, lengte: 25, afstand_lengte: 250, afstand_breedte: 590 },
     ],
-  },
+  },  
   MS100_1_75_1A: {
     label: 'MS100 1.75.1A', dikte: 100,
     gips_links: 1, profiel_breedte: 75, gips_rechts: 1,
@@ -83,6 +92,9 @@ const WAND_TYPES = {
       { laag: 1, lengte: 25, afstand_lengte: 250, afstand_breedte: 590 },
     ],
   },
+
+  // ── Dubbele profielen ──────────────────────────────────────────────────────────
+
   MS205_2_75_75_2A: {
     label: 'MS205 2.75-75.2A', dikte: 205,
     gips_links: 2, profiel_breedte: 75, gips_rechts: 2,
@@ -119,6 +131,9 @@ const WAND_TYPES = {
       { laag: 2, lengte: 35, afstand_lengte: 250, afstand_breedte: 590 },
     ],
   },
+
+  // ── MSV (voorzetwand) types ───────────────────────────────────────────────
+  
   MSV88_1_75: {
     label: 'MSV88 1.75', dikte: 88,
     gips_links: 1, profiel_breedte: 75, gips_rechts: 0,
@@ -174,16 +189,17 @@ const GIPS_LABELS = {
   osb:            'OSB',
 };
 
+// Vaste afmetingen per gipstype (overschrijft gebruikersinput indien aanwezig)
 const GIPS_VASTE_MATEN = {
   standaard_4ak: { breedte: 1200, lengte: 2400 },
-  osb:           { breedte: 1250, lengte: 2500 },
+  osb:           { breedte: 1250, lengte: 2500 }, // standaard OSB plaat
 };
 
 // ─── STATE ─────────────────────────────────────────────────────────────────
 let state = {
-  wanden: [],
-  extra_materialen: [],
-  berekening: null,
+  wanden: [],            // opgeslagen wanden
+  extra_materialen: [],  // handmatig toegevoegde materialen
+  berekening: null,      // laatste live berekening
 };
 
 // ─── DOM ────────────────────────────────────────────────────────────────────
@@ -276,119 +292,123 @@ function geldigeInputs(inp) {
          inp.wand_hoogte > 0 && !isNaN(inp.wand_hoogte);
 }
 
-// ─── BEREKEN ────────────────────────────────────────────────────────────────
+// ─── BEREKEN (lokaal — geen backend nodig voor deze formules) ───────────────
 function berekenLokaal(inp) {
   const cfg = WAND_TYPES[inp.wand_type];
   if (!cfg) return null;
 
   const wand_opp = round2(inp.wand_lengte * inp.wand_hoogte);
 
-  // U-profielen
+  // U-profielen: onder + boven regel → lengte wand / profiel lengte, ×2
+  // Bij dubbel profiel (bv. MS205): factor ×2 voor elke regel
   const profiel_factor = cfg.dubbel_profiel ? 2 : 1;
   const u_lengte_m = inp.profiel_u_lengte / 1000;
   const profiel_u_aantal = ceilN((inp.wand_lengte / u_lengte_m) * 2 * profiel_factor);
 
-  // C-profielen
+  // C-profielen: per HoH over wandlengte, dubbel bij dubbel profiel
   const profiel_c_aantal = ceilN(inp.wand_lengte / inp.hoh_afstand) * profiel_factor;
 
-  // Gipskarton — FIX: eerst totale oppervlakte per zijde berekenen, dan pas afronden
+  // Gipskarton: per laag per zijde, elk met eigen gipstype
+  // Sommige giptypes hebben vaste maten (bv. standaard_4ak = 2400×1200)
   function resolveGipsMaten(gips_type) {
     const vast = GIPS_VASTE_MATEN[gips_type];
     return vast ? vast : { breedte: inp.gips_breedte, lengte: inp.gips_lengte };
   }
+  // Gebruik maten van 1e laag links als referentie voor platen_per_laag
+  const ref_maten = resolveGipsMaten(inp.gips_type_links_1);
+  const gips_opp = (ref_maten.breedte / 1000) * (ref_maten.lengte / 1000);
+  const platen_per_laag = ceilN(wand_opp / gips_opp);
 
-  const gips_lagen = [];
+  // Bouw gips_lagen array: { zijde, laag_nr, gips_type, breedte, lengte, opp, aantal }
+  //
+  // Correcte berekening:
+  //   1. Verzamel ALLE lagen van alle zijden
+  //   2. Groepeer op gipstype+maat (over beide zijden samen)
+  //   3. Totale te bedekken opp = wand_opp × totaal aantal lagen van dit type (links + rechts)
+  //   4. Dan pas afronden: ceil(totaal_opp / plaat_opp)
+  //   5. Verdeel het afgeronde totaal eerlijk terug over de individuele lagen
 
-  // ── Links ──
-  // Bepaal maten per laag
-  const matenLinks = [];
+  // Stap 1: verzamel alle lagen (zijde + laag_nr + gipstype)
+  const alle_lagen = [];
   for (let i = 1; i <= cfg.gips_links; i++) {
     const gt = i === 1 ? inp.gips_type_links_1 : (inp.gips_type_links_2 || inp.gips_type_links_1);
-    matenLinks.push({ laag_nr: i, gips_type: gt, maten: resolveGipsMaten(gt) });
+    alle_lagen.push({ zijde: 'links', laag_nr: i, gt });
   }
-
-  // Groepeer lagen links op plaattype — zelfde plaattype samen optellen voor ceil
-  const groepLinks = {};
-  matenLinks.forEach(l => {
-    const key = l.gips_type + '|' + l.maten.breedte + '|' + l.maten.lengte;
-    if (!groepLinks[key]) groepLinks[key] = { ...l, lagen: [] };
-    groepLinks[key].lagen.push(l.laag_nr);
-  });
-
-  Object.values(groepLinks).forEach(g => {
-    const opp = round2((g.maten.breedte / 1000) * (g.maten.lengte / 1000));
-    // Totale oppervlakte = wandoppervlak × aantal lagen met dit plaattype → dan pas ceil
-    const totale_opp = wand_opp * g.lagen.length;
-    const aantal = ceilN(totale_opp / opp);
-    g.lagen.forEach(laag_nr => {
-      // Aantal eerlijk verdelen over lagen; laatste laag krijgt de rest
-      const per_laag = laag_nr === g.lagen[g.lagen.length - 1]
-        ? aantal - Math.floor(aantal / g.lagen.length) * (g.lagen.length - 1)
-        : Math.floor(aantal / g.lagen.length);
-      gips_lagen.push({
-        zijde: 'links',
-        laag_nr,
-        gips_type: g.gips_type,
-        breedte: g.maten.breedte,
-        lengte: g.maten.lengte,
-        opp,
-        aantal: per_laag,
-        aantal_totaal_zijde: aantal,  // totaal voor deze plaatcombinatie op deze zijde
-      });
-    });
-  });
-
-  // ── Rechts ──
-  const matenRechts = [];
   for (let i = 1; i <= cfg.gips_rechts; i++) {
     const gt = i === 1 ? inp.gips_type_rechts_1 : (inp.gips_type_rechts_2 || inp.gips_type_rechts_1);
-    matenRechts.push({ laag_nr: i, gips_type: gt, maten: resolveGipsMaten(gt) });
+    alle_lagen.push({ zijde: 'rechts', laag_nr: i, gt });
   }
 
-  const groepRechts = {};
-  matenRechts.forEach(l => {
-    const key = l.gips_type + '|' + l.maten.breedte + '|' + l.maten.lengte;
-    if (!groepRechts[key]) groepRechts[key] = { ...l, lagen: [] };
-    groepRechts[key].lagen.push(l.laag_nr);
-  });
+  // Stap 2: groepeer op gipstype+maat over beide zijden samen
+  const gipsGroepen = {};
+  for (const laag of alle_lagen) {
+    const m = resolveGipsMaten(laag.gt);
+    const key = `${laag.gt}|${m.breedte}|${m.lengte}`;
+    if (!gipsGroepen[key]) {
+      gipsGroepen[key] = { gt: laag.gt, m, lagen: [] };
+    }
+    gipsGroepen[key].lagen.push(laag);
+  }
 
-  Object.values(groepRechts).forEach(g => {
-    const opp = round2((g.maten.breedte / 1000) * (g.maten.lengte / 1000));
-    const totale_opp = wand_opp * g.lagen.length;
-    const aantal = ceilN(totale_opp / opp);
-    g.lagen.forEach(laag_nr => {
-      const per_laag = laag_nr === g.lagen[g.lagen.length - 1]
-        ? aantal - Math.floor(aantal / g.lagen.length) * (g.lagen.length - 1)
-        : Math.floor(aantal / g.lagen.length);
+  // Stap 3+4: bereken totaal aantal platen per groep (1x afronden over alle lagen samen)
+  // Stap 5: verdeel eerlijk terug over individuele lagen
+  const gips_lagen = [];
+  for (const key of Object.keys(gipsGroepen)) {
+    const { gt, m, lagen } = gipsGroepen[key];
+    const plaat_opp = round2((m.breedte / 1000) * (m.lengte / 1000));
+    const totaal_te_bedekken = wand_opp * lagen.length;   // bijv. 10m² × 4 lagen = 40m²
+    const totaal_aantal = ceilN(totaal_te_bedekken / plaat_opp); // 1x afronden
+    // Verdeel eerlijk over lagen: basis + eventueel 1 extra voor de eerste lagen
+    const per_laag_basis = Math.floor(totaal_aantal / lagen.length);
+    let rest = totaal_aantal - per_laag_basis * lagen.length;
+    for (const laag of lagen) {
+      const aantal = per_laag_basis + (rest > 0 ? 1 : 0);
+      if (rest > 0) rest--;
       gips_lagen.push({
-        zijde: 'rechts',
-        laag_nr,
-        gips_type: g.gips_type,
-        breedte: g.maten.breedte,
-        lengte: g.maten.lengte,
-        opp,
-        aantal: per_laag,
-        aantal_totaal_zijde: aantal,
+        zijde: laag.zijde, laag_nr: laag.laag_nr,
+        gips_type: gt, breedte: m.breedte, lengte: m.lengte,
+        opp: plaat_opp, aantal,
       });
-    });
-  });
+    }
+  }
 
+  // Hersorteer op zijde + laag_nr voor consistente weergave in tabel
+  gips_lagen.sort((a, b) => {
+    if (a.zijde !== b.zijde) return a.zijde === 'links' ? -1 : 1;
+    return a.laag_nr - b.laag_nr;
+  });
   const gips_aantal = gips_lagen.reduce((s, l) => s + l.aantal, 0);
 
   // Isolatie
-  const iso_opp = (ISOLATIE_LENGTE / 1000) * (ISOLATIE_BREEDTE / 1000);
+  const iso_opp = (ISOLATIE_LENGTE / 1000) * (ISOLATIE_BREEDTE / 1000); // m²
   const iso_aantal = cfg.isolatie ? ceilN((wand_opp / iso_opp) * cfg.isolatie_lagen) : 0;
 
-  // Schroeven
+  // Schroeven: per laag, per daadwerkelijke gipszijde
+  // Aantal rijen breedte = CEIL(gips_breedte / afstand_breedte)  (std. 590mm)
+  // Aantal rijen lengte  = CEIL(gips_lengte  / afstand_lengte)   (250mm of 750mm afhankelijk van laag)
+  // Totaal per plaat     = rijen_b × rijen_l
+  // Totaal per laag      = totaal_per_plaat × aantal_platen_in_die_laag
+  // (aantal_platen_in_die_laag wordt bepaald o.b.v. gips_lagen → werkt automatisch voor links/rechts en 1- of 2-laags systemen)
+  
   const schroeven_per_laag = (cfg.schroeven || []).map(s => {
+
+    // aantal schroeflijnen over de lengte van de plaat
     const rijen_lengte = ceilN(inp.gips_lengte / s.afstand_lengte);
+
+    // breedteverdeling op basis van daadwerkelijke hoh-afstand
     const hoh_mm = inp.hoh_afstand * 1000;
     const rijen_breedte = ceilN(inp.gips_breedte / hoh_mm);
+
+    // totaal schroeven per plaat
     const schroeven_per_plaat = rijen_lengte * rijen_breedte;
+
+    // bepaal hoeveel platen bij deze laag horen
     const platen_in_deze_laag = gips_lagen
       .filter(l => l.laag_nr === s.laag)
       .reduce((sum, l) => sum + l.aantal, 0);
+
     const totaal = schroeven_per_plaat * platen_in_deze_laag;
+
     return {
       laag: s.laag,
       lengte: s.lengte,
@@ -404,6 +424,8 @@ function berekenLokaal(inp) {
     profiel_factor,
     profiel_u_aantal,
     profiel_c_aantal,
+    gips_opp: round2(gips_opp),
+    platen_per_laag,
     gips_lagen,
     gips_aantal,
     iso_opp: round2(iso_opp),
@@ -414,7 +436,7 @@ function berekenLokaal(inp) {
   };
 }
 
-// ─── TYPE KIEZEN ────────────────────────────────────────────────────────────
+// ─── TYPE KIEZEN → derived info bijwerken ──────────────────────────────────
 function onTypeChange() {
   const type = DOM.wandType().value;
   const cfg = WAND_TYPES[type];
@@ -427,15 +449,23 @@ function onTypeChange() {
       ? `Ja (${cfg.isolatie_lagen}× laag)`
       : 'Nee';
 
+    // Toon/verberg 2e laag dropdowns afhankelijk van gips_links/rechts
     const heeftL2 = cfg.gips_links >= 2;
     const heeftR2 = cfg.gips_rechts >= 2;
     document.getElementById('groep-links-2').style.display  = heeftL2 ? '' : 'none';
     document.getElementById('groep-rechts-2').style.display = heeftR2 ? '' : 'none';
+
+    // Toon/verberg rechterzijde dropdowns voor voorzetwanden (gips_rechts === 0)
     document.getElementById('groep-rechts-1').style.display = cfg.gips_rechts > 0 ? '' : 'none';
     document.getElementById('groep-rechts-2').style.display = heeftR2 ? '' : 'none';
 
+    // Beperk isolatiedikte opties op basis van profielbreedte
     filterIsolatieDikte(cfg);
+
+    // Toon/verberg isolatie groep
     document.getElementById('isolatie-groep').style.display = cfg.isolatie ? '' : 'none';
+
+    // filter C-profielen op basis van hoogte (toon alleen ≥ hoogte)
     DOM.extraOpties().classList.remove('hidden');
     filterCProfielen();
   } else {
@@ -458,6 +488,7 @@ function filterIsolatieDikte(cfg) {
     opt.style.color = geldig ? '' : '#bbb';
     if (geldig && !eersteGeldig) eersteGeldig = opt;
   });
+  // Als huidige keuze nu disabled is, selecteer eerste geldige
   if (sel.options[sel.selectedIndex] && sel.options[sel.selectedIndex].disabled && eersteGeldig) {
     sel.value = eersteGeldig.value;
   }
@@ -477,6 +508,7 @@ function filterCProfielen() {
     if (geldig && !eersteGeldig) eersteGeldig = opt;
   });
 
+  // zet eerste geldige optie actief als huidige disabled is
   const huidig = parseInt(sel.value);
   if (huidig < hoogte_mm && eersteGeldig) {
     sel.value = eersteGeldig.value;
@@ -535,6 +567,7 @@ function voegToe() {
     profiel_breedte: result.cfg.profiel_breedte,
     profiel_u_aantal: result.profiel_u_aantal,
     profiel_c_aantal: result.profiel_c_aantal,
+    gips_opp: result.gips_opp,
     gips_lagen: result.gips_lagen,
     gips_aantal: result.gips_aantal,
     heeft_isolatie: result.heeft_isolatie,
@@ -553,6 +586,7 @@ function voegToe() {
 }
 
 // ─── VERWIJDEREN ────────────────────────────────────────────────────────────
+
 function allesVerwijderen() {
   if (!confirm('Alles verwijderen? Alle wanden, handmatige items en de projectnaam worden gewist.')) return;
   state.wanden = [];
@@ -585,6 +619,7 @@ function laadOpgeslagen() {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) state.wanden = JSON.parse(raw);
   } catch(e) { state.wanden = []; }
+  // Projectnaam herstellen
   try {
     const naam = localStorage.getItem(STORAGE_KEY_PROJECT) || '';
     if (naam) DOM.projectNaam().value = naam;
@@ -611,9 +646,11 @@ function emptyRow(colspan) {
   return `<tr class="empty-row"><td colspan="${colspan}">Nog geen gegevens</td></tr>`;
 }
 
+// Tabel 1: Algemeen
 function renderAlgemeen() {
   const tbody = DOM.tbodyAlgemeen();
   if (!state.wanden.length) { tbody.innerHTML = emptyRow(6); return; }
+
   tbody.innerHTML = state.wanden.map(w => `
     <tr>
       <td>${esc(w.omschrijving)}</td>
@@ -625,12 +662,16 @@ function renderAlgemeen() {
     </tr>`).join('');
 }
 
+
+// Tabel 2b: VU-profielen (verzwaard, optioneel, bij kozijnen)
 function renderVUProfielen() {
   const tbody = document.getElementById('tbody-vu');
   const tfoot = document.getElementById('tfoot-vu');
   if (!tbody) return;
+
   const metVU = state.wanden.filter(w => w.vu_aantal > 0);
   if (!metVU.length) { tbody.innerHTML = emptyRow(4); if (tfoot) tfoot.innerHTML = ''; return; }
+
   tbody.innerHTML = metVU.map(w => `
     <tr>
       <td>${esc(w.omschrijving)}</td>
@@ -638,6 +679,8 @@ function renderVUProfielen() {
       <td class="num">${w.vu_lengte}</td>
       <td class="num">${w.vu_aantal}</td>
     </tr>`).join('');
+
+  // Totalen: groepeer op type + lengte
   const groepen = groepeer(metVU, w => `${w.vu_type}|${w.vu_lengte}`);
   if (tfoot) tfoot.innerHTML = Object.entries(groepen).map(([key, wanden]) => {
     const [type, lengte] = key.split('|');
@@ -650,10 +693,12 @@ function renderVUProfielen() {
   }).join('');
 }
 
+// Tabel 2: U-profielen
 function renderUProfielen() {
   const tbody = DOM.tbodyU();
   const tfoot = DOM.tfootU();
   if (!state.wanden.length) { tbody.innerHTML = emptyRow(4); tfoot.innerHTML = ''; return; }
+
   tbody.innerHTML = state.wanden.map(w => `
     <tr>
       <td>${esc(w.omschrijving)}</td>
@@ -661,6 +706,8 @@ function renderUProfielen() {
       <td class="num">${w.profiel_u_lengte}</td>
       <td class="num">${w.profiel_u_aantal}</td>
     </tr>`).join('');
+
+  // Totalen: groepeer op breedte + lengte
   const groepen = groepeer(state.wanden, w => `${w.profiel_breedte}|${w.profiel_u_lengte}`);
   tfoot.innerHTML = Object.entries(groepen).map(([key, wanden]) => {
     const [breedte, lengte] = key.split('|');
@@ -673,10 +720,12 @@ function renderUProfielen() {
   }).join('');
 }
 
+// Tabel 3: C-profielen
 function renderCProfielen() {
   const tbody = DOM.tbodyC();
   const tfoot = DOM.tfootC();
   if (!state.wanden.length) { tbody.innerHTML = emptyRow(5); tfoot.innerHTML = ''; return; }
+
   tbody.innerHTML = state.wanden.map(w => `
     <tr>
       <td>${esc(w.omschrijving)}</td>
@@ -685,6 +734,7 @@ function renderCProfielen() {
       <td class="num">${fmtNum(w.hoh_afstand)}</td>
       <td class="num">${w.profiel_c_aantal}</td>
     </tr>`).join('');
+
   const groepen = groepeer(state.wanden, w => `${w.profiel_breedte}|${w.profiel_c_lengte}`);
   tfoot.innerHTML = Object.entries(groepen).map(([key, wanden]) => {
     const [breedte, lengte] = key.split('|');
@@ -697,6 +747,7 @@ function renderCProfielen() {
   }).join('');
 }
 
+// Tabel 4: Gipskarton — één rij per laag per zijde
 function renderGips() {
   const tbody = DOM.tbodyGips();
   const tfoot = DOM.tfootGips();
@@ -728,6 +779,7 @@ function renderGips() {
       <td class="num">${r.aantal}</td>
     </tr>`).join('');
 
+  // Totalen: groepeer op gipstype + afmeting
   const groepen = groepeer(rijen, r => `${r.gips_type}|${r.gips_lengte}|${r.gips_breedte}`);
   tfoot.innerHTML = Object.entries(groepen).map(([key, items]) => {
     const [type, lengte, breedte] = key.split('|');
@@ -740,11 +792,14 @@ function renderGips() {
   }).join('');
 }
 
+// Tabel 5: Isolatie
 function renderIsolatie() {
   const tbody = DOM.tbodyIsolatie();
   const tfoot = DOM.tfootIsolatie();
   const metIsolatie = state.wanden.filter(w => w.heeft_isolatie);
+
   if (!metIsolatie.length) { tbody.innerHTML = emptyRow(6); tfoot.innerHTML = ''; return; }
+
   tbody.innerHTML = metIsolatie.map(w => `
     <tr>
       <td>${esc(w.omschrijving)}</td>
@@ -754,6 +809,7 @@ function renderIsolatie() {
       <td class="num">${w.isolatie_lagen}×</td>
       <td class="num">${w.iso_aantal}</td>
     </tr>`).join('');
+
   const groepen = groepeer(metIsolatie, w => `${w.isolatie_dikte}`);
   tfoot.innerHTML = Object.entries(groepen).map(([dikte, wanden]) => {
     const totaal = wanden.reduce((s, w) => s + w.iso_aantal, 0);
@@ -765,9 +821,13 @@ function renderIsolatie() {
   }).join('');
 }
 
+
+// Tabel 6: Schroeven
 function renderSchroeven() {
   const tbody = DOM.tbodySchroeven();
   const tfoot = DOM.tfootSchroeven();
+
+  // Bouw rijen: per wand, per laag
   const rijen = [];
   state.wanden.forEach(w => {
     (w.schroeven_per_laag || []).forEach(s => {
@@ -780,7 +840,9 @@ function renderSchroeven() {
       });
     });
   });
+
   if (!rijen.length) { tbody.innerHTML = emptyRow(6); tfoot.innerHTML = ''; return; }
+
   tbody.innerHTML = rijen.map(r => `
     <tr>
       <td>${esc(r.omschrijving)}</td>
@@ -789,6 +851,8 @@ function renderSchroeven() {
       <td class="num">${r.afstand_lengte}</td>
       <td class="num">${r.totaal}</td>
     </tr>`).join('');
+
+  // Totalen groeperen op lengte (schroeftype)
   const groepen = groepeer(rijen, r => `${r.lengte}`);
   tfoot.innerHTML = Object.entries(groepen).map(([lengte, items]) => {
     const totaal = items.reduce((s, r) => s + r.totaal, 0);
@@ -800,6 +864,8 @@ function renderSchroeven() {
   }).join('');
 }
 
+
+// Tabel 7: Totaaloverzicht — alle materialen gesommeerd + handmatig toegevoegde
 function renderTotalen() {
   const el = document.getElementById('tbody-totalen');
   if (!el) return;
@@ -807,8 +873,12 @@ function renderTotalen() {
   const heeftWanden = state.wanden.length > 0;
   const heeftExtra  = state.extra_materialen.length > 0;
 
-  if (!heeftWanden && !heeftExtra) { el.innerHTML = emptyRow(4); return; }
+  if (!heeftWanden && !heeftExtra) {
+    el.innerHTML = emptyRow(4);
+    return;
+  }
 
+  // ── Materialen uit wanden ─────────────────────────────────────────────────
   const materialen = {};
   function tel(categorie, omschrijving, eenheid, aantal) {
     const key = `${categorie}||${omschrijving}||${eenheid}`;
@@ -830,7 +900,15 @@ function renderTotalen() {
     });
   });
 
-  const CATEGORIE_VOLGORDE = ['U-profielen','C-profielen','Gipskarton','Isolatie','Schroeven'];
+  // Vaste categorie-volgorde
+  const CATEGORIE_VOLGORDE = [
+    'U-profielen',
+    'C-profielen',
+    'Gipskarton',
+    'Isolatie',
+    'Schroeven',
+  ];
+
   const wandRijen = Object.values(materialen).sort((a, b) => {
     const ai = CATEGORIE_VOLGORDE.indexOf(a.categorie);
     const bi = CATEGORIE_VOLGORDE.indexOf(b.categorie);
@@ -855,18 +933,23 @@ function renderTotalen() {
     return row;
   }).join('');
 
+  // ── Handmatig toegevoegde materialen ─────────────────────────────────────
   if (heeftExtra) {
+    // Groepeer extra materialen op categorie
     const extraGroepen = {};
     state.extra_materialen.forEach(e => {
       const cat = e.categorie || 'Handmatig toegevoegd';
       if (!extraGroepen[cat]) extraGroepen[cat] = [];
       extraGroepen[cat].push(e);
     });
+
+    // Sorteer: VU-profielen eerst, dan rest alfabetisch
     const catVolgorde = Object.keys(extraGroepen).sort((a, b) => {
       if (a === 'VU-profielen') return -1;
       if (b === 'VU-profielen') return 1;
       return a.localeCompare(b);
     });
+
     catVolgorde.forEach(cat => {
       html += `<tr class="totaal-categorie-header totaal-header-extra"><td colspan="4">${esc(cat)}</td></tr>`;
       html += extraGroepen[cat].map(e => `
@@ -884,6 +967,7 @@ function renderTotalen() {
 
 // ── Handmatig materiaal toevoegen ────────────────────────────────────────────
 function voegHandmatigToe() {
+  // Bepaal of VU of vrij materiaal ingevuld is
   const vuAantal  = parseInt(DOM.vuAantal().value);
   const vuLengte  = parseInt(DOM.vuLengte().value);
   const vuType    = DOM.vuType().value;
@@ -894,7 +978,11 @@ function voegHandmatigToe() {
   const eenheid      = DOM.extraEenheid().value.trim() || 'st';
   const isVrij       = omschrijving && !isNaN(extraAantal) && extraAantal > 0;
 
-  if (!isVU && !isVrij) { DOM.vuAantal().focus(); return; }
+  if (!isVU && !isVrij) {
+    // Niets geldig ingevuld
+    DOM.vuAantal().focus();
+    return;
+  }
 
   if (isVU) {
     state.extra_materialen.push({
@@ -948,8 +1036,10 @@ function esc(str) {
 
 // ─── EVENTS ──────────────────────────────────────────────────────────────────
 function initEvents() {
+  // Type dropdown → direct
   DOM.wandType().addEventListener('change', onTypeChange);
 
+  // Numerieke inputs → debounce
   [DOM.wandLengte, DOM.wandHoogte, DOM.hohAfstand, DOM.gipsBreedte,
    DOM.gipsLengte, DOM.profielULengte, DOM.profielCLengte,
    DOM.isolatieDikte, DOM.gipsTypeLinks1, DOM.gipsTypeLinks2,
@@ -968,6 +1058,7 @@ function initEvents() {
   DOM.btnAllesReset().addEventListener('click', allesVerwijderen);
   DOM.btnHandmatigAdd().addEventListener('click', voegHandmatigToe);
 
+  // Enter in handmatig invoer velden → toevoegen
   [DOM.extraOmschrijving, DOM.extraAantal, DOM.extraEenheid,
    DOM.vuAantal, DOM.vuLengte].forEach(getFn => {
     getFn().addEventListener('keydown', e => { if (e.key === 'Enter') voegHandmatigToe(); });
