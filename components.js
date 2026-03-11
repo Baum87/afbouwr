@@ -7,6 +7,23 @@
  *   <site-footer></site-footer>                    → identiek op alle pagina's
  */
 
+// ── Google Analytics ───────────────────────────────────────────────────────
+
+(function() {
+  const GA_ID = 'G-XWKLQMHNSH';
+
+  const script = document.createElement('script');
+  script.async = true;
+  script.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_ID;
+  document.head.appendChild(script);
+
+  window.dataLayer = window.dataLayer || [];
+  function gtag() { dataLayer.push(arguments); }
+  window.gtag = gtag;
+  gtag('js', new Date());
+  gtag('config', GA_ID);
+})();
+
 // ── <site-nav> ─────────────────────────────────────────────────────────────
 
 class SiteNav extends HTMLElement {
