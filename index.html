@@ -5,378 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Afbouwr — Materiaalcalculatoren voor de afbouw</title>
   <meta name="description" content="Gratis materiaalcalculatoren voor de afbouwsector. Bereken snel en correct hoeveel materiaal je nodig hebt voor systeemplafond, metalstud wand en meer." />
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=3.3" />
   <style>
-    /* ── Hub-specifieke stijlen ── */
-
-    /* Hero */
-    .hero {
-      padding: clamp(3rem, 8vw, 6rem) 0 clamp(2rem, 5vw, 4rem);
-    }
-
-    .hero-label {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--ink-3);
-      text-transform: uppercase;
-      letter-spacing: .08em;
-      margin-bottom: 1.25rem;
-    }
-
-    .hero-label-dot {
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: var(--accent);
-    }
-
-    .hero-title {
-      font-family: var(--font-display);
-      font-size: clamp(2rem, 5vw, 3.2rem);
-      font-weight: 400;
-      letter-spacing: -.02em;
-      line-height: 1.1;
-      color: var(--ink);
-      max-width: 620px;
-      margin-bottom: 1.25rem;
-    }
-
-    .hero-title em {
-      font-style: italic;
-      color: var(--accent);
-    }
-
-    .hero-desc {
-      font-size: .95rem;
-      color: var(--ink-2);
-      line-height: 1.7;
-      max-width: 480px;
-      font-weight: 300;
-      margin-bottom: 0;
-    }
-
-    /* ── Calculator kaarten grid ── */
-    .tools-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 16px;
-      margin-top: 0;
-    }
-
-    .tool-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--r-lg);
-      padding: 24px;
-      box-shadow: var(--shadow);
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      text-decoration: none;
-      color: inherit;
-      transition: transform .18s var(--ease), box-shadow .18s var(--ease), border-color .18s;
-      position: relative;
-    }
-
-    .tool-card:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-lg);
-      border-color: var(--border-2);
-    }
-
-    .tool-card.inactive {
-      pointer-events: none;
-      opacity: .72;
-    }
-
-    .tool-card-top {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 12px;
-    }
-
-    .tool-icon {
-      width: 40px; height: 40px;
-      border-radius: 10px;
-      background: var(--surface-2);
-      display: grid;
-      place-items: center;
-      font-size: 18px;
-      flex-shrink: 0;
-      border: 1px solid var(--border);
-    }
-
-    .tool-card.live .tool-icon {
-      background: var(--accent-light);
-      border-color: rgba(31,107,69,.15);
-    }
-
-    .tool-title {
-      font-family: var(--font);
-      font-size: .95rem;
-      font-weight: 600;
-      color: var(--ink);
-      letter-spacing: -.01em;
-      line-height: 1.25;
-      flex: 1;
-    }
-
-    .tool-desc {
-      font-size: .83rem;
-      color: var(--ink-2);
-      line-height: 1.6;
-      font-weight: 300;
-      margin: 0;
-    }
-
-    .tool-card-footer {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-top: auto;
-      padding-top: 12px;
-      border-top: 1px solid var(--border);
-    }
-
-    .tool-meta {
-      font-size: 11px;
-      color: var(--ink-3);
-      font-weight: 500;
-    }
-
-    .tool-arrow {
-      font-size: 14px;
-      color: var(--accent);
-      opacity: 0;
-      transform: translateX(-4px);
-      transition: opacity .15s, transform .15s;
-    }
-
-    .tool-card:hover .tool-arrow {
-      opacity: 1;
-      transform: translateX(0);
-    }
-
-    /* ── Roadmap sectie ── */
-    .roadmap-list {
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-      border: 1px solid var(--border);
-      border-radius: var(--r);
-      overflow: hidden;
-      background: var(--surface);
-      box-shadow: var(--shadow);
-    }
-
-    .roadmap-item {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      padding: 16px 20px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .roadmap-item:last-child {
-      border-bottom: none;
-    }
-
-    .roadmap-icon {
-      width: 34px; height: 34px;
-      border-radius: 8px;
-      background: var(--surface-2);
-      display: grid;
-      place-items: center;
-      font-size: 15px;
-      flex-shrink: 0;
-      border: 1px solid var(--border);
-    }
-
-    .roadmap-info {
-      flex: 1;
-    }
-
-    .roadmap-title {
-      font-size: .88rem;
-      font-weight: 600;
-      color: var(--ink);
-      letter-spacing: -.01em;
-    }
-
-    .roadmap-desc {
-      font-size: .78rem;
-      color: var(--ink-3);
-      margin-top: 2px;
-      font-weight: 300;
-    }
-
-    /* ── Bug melden ── */
-    .bug-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--r);
-      padding: 28px;
-      box-shadow: var(--shadow);
-    }
-
-    .bug-form {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      margin-top: 18px;
-    }
-
-    .bug-form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-    }
-
-    .bug-form .form-group label {
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--ink-2);
-      text-transform: uppercase;
-      letter-spacing: .5px;
-    }
-
-    .bug-form textarea {
-      width: 100%;
-      min-height: 100px;
-      padding: 10px 12px;
-      border: 1.5px solid var(--border);
-      border-radius: var(--r-sm);
-      font-family: var(--font);
-      font-size: 14px;
-      color: var(--ink);
-      background: var(--surface);
-      resize: vertical;
-      outline: none;
-      transition: border-color .15s, box-shadow .15s;
-      line-height: 1.5;
-    }
-
-    .bug-form textarea:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(31,107,69,.12);
-    }
-
-    .bug-form textarea::placeholder {
-      color: var(--ink-3);
-    }
-
-    .bug-status {
-      font-size: 13px;
-      color: var(--accent);
-      font-weight: 500;
-      display: none;
-    }
-
-    .bug-status.visible {
-      display: block;
-    }
-
-    /* ── Sectie spacing ── */
-    .hub-section {
-      padding: clamp(2rem, 5vw, 3.5rem) 0;
-    }
-
-    .hub-section + .hub-section {
-      border-top: 1px solid var(--border);
-    }
-
-    .hub-section-head {
-      margin-bottom: 24px;
-    }
-
-    .hub-section-eyebrow {
-      display: block;
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--ink-3);
-      text-transform: uppercase;
-      letter-spacing: .1em;
-      margin-bottom: .5rem;
-    }
-
-    .hub-section-title {
-      font-family: var(--font-display);
-      font-size: clamp(1.2rem, 2.5vw, 1.55rem);
-      font-weight: 400;
-      color: var(--ink);
-      letter-spacing: -.01em;
-    }
-
-    /* ── Footer ── */
-    .hub-footer {
-      border-top: 1px solid var(--border);
-      padding: 2rem 0;
-      margin-top: 0;
-    }
-
-    .hub-footer-inner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
-
-    .hub-footer-logo {
-      font-family: var(--font-display);
-      font-size: .9rem;
-      font-weight: 600;
-      color: var(--ink);
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      gap: .4rem;
-    }
-
-    .hub-footer-copy {
-      font-size: .75rem;
-      color: var(--ink-3);
-      font-weight: 300;
-    }
-
-    /* ── Animaties ── */
-    .anim-up   { animation: fadeUp .5s cubic-bezier(.4,0,.2,1) both; }
-    .anim-up-1 { animation: fadeUp .5s .08s cubic-bezier(.4,0,.2,1) both; }
-    .anim-up-2 { animation: fadeUp .5s .16s cubic-bezier(.4,0,.2,1) both; }
-    .anim-up-3 { animation: fadeUp .5s .24s cubic-bezier(.4,0,.2,1) both; }
-    .anim-up-4 { animation: fadeUp .5s .32s cubic-bezier(.4,0,.2,1) both; }
-    .anim-up-5 { animation: fadeUp .5s .40s cubic-bezier(.4,0,.2,1) both; }
-
-    /* ── Responsive ── */
+    /* ── Hub-specifieke responsive overrides ── */
     @media (max-width: 600px) {
-      .tools-grid { grid-template-columns: 1fr; }
-      .bug-form-row { grid-template-columns: 1fr; }
+      .tools-grid       { grid-template-columns: 1fr; }
+      .bug-form-row     { grid-template-columns: 1fr; }
       .hub-footer-inner { flex-direction: column; align-items: flex-start; }
     }
   </style>
 </head>
-<body>
+<body class="has-nav">
 
-  <!-- ── NAVIGATIE ── -->
-  <nav class="nav">
-    <a href="/" class="nav-logo">
-      <span class="nav-logo-dot"></span>
-      Afbouwr
-    </a>
-    <ul class="nav-links">
-      <li><a href="#tools">Calculatoren</a></li>
-      <li><a href="#roadmap">Roadmap</a></li>
-      <li><a href="#bug">Bug melden</a></li>
-    </ul>
-  </nav>
+  <site-nav></site-nav>
 
-  <div class="app-wrapper" style="padding-top: 0;">
+  <div class="hub-wrapper">
 
     <!-- ── HERO ── -->
-    <section class="hub-section hero" style="border: none;">
+    <section class="hub-section hero">
       <div class="hero-label anim-up">
         <span class="hero-label-dot"></span>
         Afbouwsector · Gratis tools
@@ -390,7 +36,7 @@
     </section>
 
     <!-- ── CALCULATOREN ── -->
-    <section class="hub-section" id="tools" style="padding-top: 0;">
+    <section class="hub-section" id="tools">
       <div class="hub-section-head anim-up-3">
         <span class="hub-section-eyebrow">Live</span>
         <h2 class="hub-section-title">Beschikbare calculatoren</h2>
@@ -398,7 +44,6 @@
 
       <div class="tools-grid">
 
-        <!-- Systeemplafond -->
         <a href="https://systeemplafond.afbouwr.nl" class="tool-card live anim-up-3">
           <div class="tool-card-top">
             <div class="tool-icon">🔲</div>
@@ -414,7 +59,6 @@
           </div>
         </a>
 
-        <!-- Metalstud Wand -->
         <a href="https://metalstud.afbouwr.nl" class="tool-card live anim-up-4">
           <div class="tool-card-top">
             <div class="tool-icon">▦</div>
@@ -498,9 +142,7 @@
       </div>
 
       <div class="bug-card anim-up-1">
-        <p style="font-size:.88rem; color:var(--ink-2); line-height:1.65; font-weight:300; margin:0;">
-          Klopt er iets niet in een berekening, of werkt er iets niet zoals verwacht? Laat het weten.
-        </p>
+        <p>Klopt er iets niet in een berekening, of werkt er iets niet zoals verwacht? Laat het weten.</p>
 
         <div class="bug-form">
           <div class="bug-form-row">
@@ -514,7 +156,9 @@
               </select>
             </div>
             <div class="form-group">
-              <label for="bug-naam">Naam <span style="font-weight:400;color:var(--ink-3);font-size:10px;text-transform:none;letter-spacing:0;">(optioneel)</span></label>
+              <label for="bug-naam">
+                Naam <span class="optioneel-tag">optioneel</span>
+              </label>
               <input type="text" id="bug-naam" placeholder="bijv. Jan" autocomplete="off" />
             </div>
           </div>
@@ -524,7 +168,7 @@
             <textarea id="bug-omschrijving" placeholder="Beschrijf zo concreet mogelijk wat er niet klopt — welke invoer, welk resultaat je verwacht, wat je ziet."></textarea>
           </div>
 
-          <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
+          <div class="bug-form-actions">
             <button class="btn btn-primary" id="btn-bug-verzenden">Verstuur melding</button>
             <span class="bug-status" id="bug-status">✓ Bedankt, melding verstuurd.</span>
           </div>
@@ -534,24 +178,10 @@
 
   </div>
 
-  <!-- ── FOOTER ── -->
-  <footer class="hub-footer">
-    <div class="app-wrapper" style="padding-bottom: 0;">
-      <div class="hub-footer-inner">
-        <div>
-          <a href="/" class="hub-footer-logo">
-            <span class="nav-logo-dot"></span>
-            Afbouwr
-          </a>
-          <div class="hub-footer-copy" style="margin-top:.25rem;">Gratis materiaalcalculatoren voor de afbouwsector</div>
-        </div>
-        <div class="hub-footer-copy">
-          <a href="mailto:info@afbouwr.nl" style="color:var(--ink-2);text-decoration:none;">info@afbouwr.nl</a>
-        </div>
-      </div>
-    </div>
-  </footer>
+  <site-footer></site-footer>
 
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+  <script src="components.js?v=3.3"></script>
   <script>
     // ── Bug formulier ──────────────────────────────────────────────────────
     document.getElementById('btn-bug-verzenden').addEventListener('click', function() {
@@ -566,8 +196,8 @@
 
       var subject = 'Bug melding' + (calculator ? ' — ' + calculator : '');
       var body    = '';
-      if (naam)         body += 'Van: ' + naam + '\n';
-      if (calculator)   body += 'Calculator: ' + calculator + '\n';
+      if (naam)       body += 'Van: ' + naam + '\n';
+      if (calculator) body += 'Calculator: ' + calculator + '\n';
       body += '\nOmschrijving:\n' + omschrijving;
 
       var mailto = 'mailto:info@afbouwr.nl'
@@ -576,7 +206,6 @@
 
       window.location.href = mailto;
 
-      // Reset en bevestiging
       document.getElementById('bug-calculator').value   = '';
       document.getElementById('bug-naam').value         = '';
       document.getElementById('bug-omschrijving').value = '';
@@ -588,9 +217,7 @@
 
     // Enter in textarea → niet versturen (behoud multiline)
     document.getElementById('bug-omschrijving').addEventListener('keydown', function(e) {
-      if (e.key === 'Enter' && e.metaKey) {
-        document.getElementById('btn-bug-verzenden').click();
-      }
+      if (e.key === 'Enter' && !e.shiftKey) e.stopPropagation();
     });
   </script>
 

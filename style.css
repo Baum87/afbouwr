@@ -1,5 +1,5 @@
 /* ==========================================================================
-   AFBOUWR — Uniforme stijl v3.0
+   AFBOUWR — Uniforme stijl v3.3
    Van toepassing op:
      • afbouwr.nl                    (hub)
      • metalstud.afbouwr.nl          (Metalstud Wand)
@@ -196,6 +196,15 @@ body.has-nav { padding-top: 56px; }
   border-radius: 10px; flex-shrink: 0;
 }
 
+.brand-text { display: flex; flex-direction: column; gap: 1px; }
+
+.brand-eyebrow {
+  font-size: 10px; font-weight: 600;
+  color: var(--ink-3);
+  text-transform: uppercase; letter-spacing: .1em;
+  line-height: 1;
+}
+
 .brand h1 {
   font-size: 1.35rem; font-weight: 600;
   letter-spacing: -.02em; line-height: 1.1;
@@ -347,6 +356,101 @@ body.has-nav { padding-top: 56px; }
 /* Extra opties */
 .extra-opties { margin-top: 20px; }
 .extra-opties.hidden { display: none; }
+
+/* ==========================================================================
+   GEDEELDE CALCULATOR PATRONEN
+   ========================================================================== */
+
+/* Compacte keuze-knoppen (systeemtype, kleur, variant) */
+.btn-group-compact {
+  display: flex;
+  gap: 10px;
+  width: fit-content;
+  margin-top: 4px;
+}
+.btn-group-compact .btn {
+  flex: none;
+  height: 38px;
+  padding: 0 20px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 14px;
+  min-width: 130px;
+}
+.btn-group-compact .btn.active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+.btn-group-compact .btn:hover:not(.active) {
+  border-color: var(--border-2);
+}
+
+/* Kleur-swatch in knop */
+.kleur-swatch {
+  display: inline-block;
+  width: 11px; height: 11px;
+  border-radius: 2px;
+  vertical-align: middle;
+  margin-right: 6px;
+  flex-shrink: 0;
+}
+.kleur-swatch-wit   { background: #fff;    border: 1.5px solid #CECCBF; }
+.kleur-swatch-zwart { background: #1C2B3A; border: 1.5px solid #1C2B3A; }
+
+/* Radio-keuze kolom */
+.radio-rij {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding-top: 2px;
+}
+.radio-rij label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  color: var(--ink);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.radio-rij input[type="radio"] {
+  width: 15px; height: 15px;
+  accent-color: var(--accent);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* Invoer-rij: omschrijving + methode + maten op één rij */
+.invoer-rij {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr 1fr;
+  gap: 14px;
+  align-items: start;
+}
+
+/* Vrij invoerveld dat na een select verschijnt (bijv. merk-anders) */
+.input-sub {
+  display: none;
+  margin-top: 8px;
+}
+.input-sub.visible {
+  display: block;
+}
+
+/* Sectie-scheiding met extra marge (boven materiaalspecificatie) */
+.sectie-scheiding-lg {
+  margin: 20px 0 16px;
+}
+
+/* Tfoot hint-cel (bijv. 'zie totaaloverzicht ↓') */
+.tfoot-hint {
+  text-align: center;
+  color: var(--ink-3);
+  font-size: 12px;
+  font-weight: 400;
+}
 
 /* ==========================================================================
    SPECS GRID (metalstud — vaste kolom-indeling)
@@ -667,6 +771,365 @@ table select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0
    HUB LAYOUT (afbouwr.nl landingspagina)
    ========================================================================== */
 
+/* ── Hub wrapper ── */
+.hub-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 clamp(1rem, 3vw, 24px);
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Hero ── */
+.hero {
+  padding: clamp(3rem, 8vw, 6rem) 0 clamp(2rem, 5vw, 4rem);
+}
+
+.hero-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-3);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  margin-bottom: 1.25rem;
+}
+
+.hero-label-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  font-weight: 400;
+  letter-spacing: -.02em;
+  line-height: 1.1;
+  color: var(--ink);
+  max-width: 620px;
+  margin-bottom: 1.25rem;
+}
+
+.hero-title em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+.hero-desc {
+  font-size: .95rem;
+  color: var(--ink-2);
+  line-height: 1.7;
+  max-width: 480px;
+  font-weight: 300;
+}
+
+/* ── Hub secties ── */
+.hub-section {
+  padding: clamp(2rem, 5vw, 3.5rem) 0;
+}
+
+.hub-section + .hub-section {
+  border-top: 1px solid var(--border);
+}
+
+.hub-section-head {
+  margin-bottom: 24px;
+}
+
+.hub-section-eyebrow {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-3);
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  margin-bottom: .5rem;
+}
+
+.hub-section-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.2rem, 2.5vw, 1.55rem);
+  font-weight: 400;
+  color: var(--ink);
+  letter-spacing: -.01em;
+}
+
+/* ── Calculator kaarten grid ── */
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.tool-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 24px;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-decoration: none;
+  color: inherit;
+  transition: transform .18s var(--ease), box-shadow .18s var(--ease), border-color .18s;
+  position: relative;
+}
+
+.tool-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--border-2);
+}
+
+.tool-card.inactive {
+  pointer-events: none;
+  opacity: .72;
+}
+
+.tool-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.tool-icon {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  background: var(--surface-2);
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+}
+
+.tool-card.live .tool-icon {
+  background: var(--accent-light);
+  border-color: rgba(31,107,69,.15);
+}
+
+.tool-title {
+  font-family: var(--font);
+  font-size: .95rem;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: -.01em;
+  line-height: 1.25;
+  flex: 1;
+}
+
+.tool-desc {
+  font-size: .83rem;
+  color: var(--ink-2);
+  line-height: 1.6;
+  font-weight: 300;
+  margin: 0;
+}
+
+.tool-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.tool-meta {
+  font-size: 11px;
+  color: var(--ink-3);
+  font-weight: 500;
+}
+
+.tool-arrow {
+  font-size: 14px;
+  color: var(--accent);
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity .15s, transform .15s;
+}
+
+.tool-card:hover .tool-arrow {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* ── Roadmap ── */
+.roadmap-list {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  overflow: hidden;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.roadmap-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.roadmap-item:last-child {
+  border-bottom: none;
+}
+
+.roadmap-icon {
+  width: 34px; height: 34px;
+  border-radius: 8px;
+  background: var(--surface-2);
+  display: grid;
+  place-items: center;
+  font-size: 15px;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+}
+
+.roadmap-info { flex: 1; }
+
+.roadmap-title {
+  font-size: .88rem;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: -.01em;
+}
+
+.roadmap-desc {
+  font-size: .78rem;
+  color: var(--ink-3);
+  margin-top: 2px;
+  font-weight: 300;
+}
+
+/* ── Bug melden ── */
+.bug-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 28px;
+  box-shadow: var(--shadow);
+}
+
+.bug-card > p {
+  font-size: .88rem;
+  color: var(--ink-2);
+  line-height: 1.65;
+  font-weight: 300;
+}
+
+.bug-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.bug-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.bug-form .form-group label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-2);
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+
+.bug-form textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 10px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-sm);
+  font-family: var(--font);
+  font-size: 14px;
+  color: var(--ink);
+  background: var(--surface);
+  resize: vertical;
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+  line-height: 1.5;
+}
+
+.bug-form textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(31,107,69,.12);
+}
+
+.bug-form textarea::placeholder {
+  color: var(--ink-3);
+}
+
+.bug-form-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.bug-status {
+  font-size: 13px;
+  color: var(--accent);
+  font-weight: 500;
+  display: none;
+}
+
+.bug-status.visible {
+  display: block;
+}
+
+/* ── Hub footer ── */
+.hub-footer {
+  border-top: 1px solid var(--border);
+  padding: 2rem 0;
+}
+
+.hub-footer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.hub-footer-logo {
+  font-family: var(--font-display);
+  font-size: .9rem;
+  font-weight: 600;
+  color: var(--ink);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+}
+
+.hub-footer-copy {
+  font-size: .75rem;
+  color: var(--ink-3);
+  font-weight: 300;
+}
+
+.footer-mail {
+  color: var(--ink-2);
+  text-decoration: none;
+  font-size: .75rem;
+  transition: color .15s;
+}
+.footer-mail:hover { color: var(--ink); }
+
+/* Verouderd — behouden voor compatibiliteit */
 .section-hub {
   max-width: 1160px; margin: 0 auto;
   padding: clamp(2.5rem, 6vw, 5rem) clamp(1.25rem, 5vw, 4rem);
@@ -747,11 +1210,12 @@ hr { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
 @keyframes slideIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes fadeUp  { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
 
-.anim-up   { animation: fadeUp .45s cubic-bezier(.4,0,.2,1) both; }
-.anim-up-1 { animation: fadeUp .45s .10s cubic-bezier(.4,0,.2,1) both; }
-.anim-up-2 { animation: fadeUp .45s .18s cubic-bezier(.4,0,.2,1) both; }
-.anim-up-3 { animation: fadeUp .45s .26s cubic-bezier(.4,0,.2,1) both; }
-.anim-up-4 { animation: fadeUp .45s .34s cubic-bezier(.4,0,.2,1) both; }
+.anim-up   { animation: fadeUp .5s cubic-bezier(.4,0,.2,1) both; }
+.anim-up-1 { animation: fadeUp .5s .08s cubic-bezier(.4,0,.2,1) both; }
+.anim-up-2 { animation: fadeUp .5s .16s cubic-bezier(.4,0,.2,1) both; }
+.anim-up-3 { animation: fadeUp .5s .24s cubic-bezier(.4,0,.2,1) both; }
+.anim-up-4 { animation: fadeUp .5s .32s cubic-bezier(.4,0,.2,1) both; }
+.anim-up-5 { animation: fadeUp .5s .40s cubic-bezier(.4,0,.2,1) both; }
 
 /* ==========================================================================
    RESPONSIVE
@@ -761,6 +1225,9 @@ hr { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
   .specs-rij              { grid-template-columns: 1fr 1fr; }
   #gips-select-groep      { grid-template-columns: 1fr 1fr; }
   .specs-rij-1col         { max-width: 100%; }
+  .invoer-rij             { grid-template-columns: 1fr 1fr; }
+  .btn-group-compact      { width: 100%; }
+  .btn-group-compact .btn { flex: 1; min-width: 0; }
 }
 
 @media (max-width: 640px) {
@@ -780,6 +1247,7 @@ hr { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
   .form-grid              { grid-template-columns: 1fr; }
   .specs-rij              { grid-template-columns: 1fr; }
   #gips-select-groep      { grid-template-columns: 1fr; }
+  .invoer-rij             { grid-template-columns: 1fr; }
   .button-group           { flex-direction: column; }
   .button-group .btn      { width: 100%; }
   .table-actions          { flex-direction: column; }
