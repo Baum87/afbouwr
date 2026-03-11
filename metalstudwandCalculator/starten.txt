@@ -1,0 +1,9 @@
+Simpelste manier — Python (staat op elke Mac/Linux):
+
+Zet alle 3 bestanden (index.html, style.css, app.js) in één map
+Open terminal in die map
+Run:
+
+bashpython3 -m http.server 8000
+
+Open browser → http://localhost:8000

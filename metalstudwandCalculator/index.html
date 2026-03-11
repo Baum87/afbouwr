@@ -1,1 +1,474 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Metalstud Wand Rekenmachine</title>
+  <link rel="stylesheet" href="style.css?v=20260304" />
+</head>
+<body class="has-nav">
+  <div class="app-wrapper">
+    <header class="app-header">
+      <div class="header-inner">
+        <div class="brand">
+          <span class="brand-icon">▦</span>
+          <div>
+            <h1>Metalstud Wand</h1>
+            <p class="brand-sub">Materiaalcalculator</p>
+          </div>
+        </div>
+        <div class="header-rechts">
+          <div class="project-invoer">
+            <label for="project-naam">Projectnaam</label>
+            <input type="text" id="project-naam" placeholder="bijv. Verbouwing Kantoor A" autocomplete="off" />
+          </div>
+          <button class="btn btn-reset" id="btn-alles-reset" title="Verwijder alle wanden en herstel projectnaam">↺ Alles verwijderen</button>
+        </div>
+      </div>
+    </header>
 
+    <main class="main-content">
+      <!-- INPUT PANEL -->
+      <section class="card input-card">
+        <h2 class="card-title">Wand invoer</h2>
+
+        <div class="form-grid">
+          <!-- Basis -->
+          <div class="form-group">
+            <label for="wand-omschrijving">Omschrijving</label>
+            <input type="text" id="wand-omschrijving" placeholder="bijv. Wand 01" />
+          </div>
+
+          <div class="form-group">
+            <label for="wand-type">Type wand</label>
+            <select id="wand-type">
+              <option value="">— kies type —</option>
+              <optgroup label="MS — Dubbelzijdig gips">
+                <option value="MS75_1_50_1">MS75 1.50.1 — 75mm | 1+1×gips | C50</option>
+                <option value="MS100_2_50_2">MS100 2.50.2 — 100mm | 2+2×gips | C50 </option>
+                <option value="MS100_2_50_2A">MS100 2.50.2A — 100mm | 2+2×gips | C50 | isolatie</option>
+                <option value="MS100_1_75_1">MS100 1.75.1 — 100mm | 1+1×gips | C75</option>
+                <option value="MS100_1_75_1A">MS100 1.75.1A — 100mm | 1+1×gips | C75 | isolatie</option>
+                <option value="MS125_2_75_2">MS125 2.75.2 — 125mm | 2+2×gips | C75</option>            
+                <option value="MS125_2_75_2A">MS125 2.75.2A — 125mm | 2+2×gips | C75 | isolatie</option>
+                <option value="MS125_1_100_1A">MS125 1.100.1A — 125mm | 1+1×gips | C100 | isolatie</option>
+                <option value="MS205_2_75_75_2A">MS205 2.75-75.2A — 205mm | 2+2×gips | dubbel C75 | 1×isolatie</option>
+                <option value="MS205_2_75_75_2AA">MS205 2.75-75.2AA — 205mm | 2+2×gips | dubbel C75 | 2×isolatie</option>
+                <option value="MS250_2_100_100_2A">MS250 2.100-100.2A — 255mm | 2+2×gips | dubbel C100 | 1×isolatie</option>
+                <option value="MS250_2_100_100_2AA">MS250 2.100-100.2AA — 255mm | 2+2×gips | dubbel C100 | 2×isolatie</option> 
+              </optgroup>
+              <optgroup label="MSV — Voorzetwand (éénzijdig gips)">
+                <option value="MSV75_2_50">MSV75 2.50 — 75mm | 2×gips | C50</option>
+                <option value="MSV75_2_50A">MSV75 2.50A — 75mm | 2×gips | C50 | isolatie</option>
+                <option value="MSV88_1_75">MSV88 1.75 — 88mm | 1×gips | C75</option>
+                <option value="MSV100_2_75">MSV100 2.75 — 100mm | 2×gips | C75</option>
+                <option value="MSV100_2_75A">MSV100 2.75A — 100mm | 2×gips | C75 | isolatie</option>
+              </optgroup>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="wand-lengte">Wandlengte (m)</label>
+            <input type="number" id="wand-lengte" placeholder="bijv. 5.40" step="0.01" min="0" />
+          </div>
+
+          <div class="form-group">
+            <label for="wand-hoogte">Wandhoogte (m)</label>
+            <input type="number" id="wand-hoogte" placeholder="bijv. 2.70" step="0.01" min="0" />
+          </div>
+
+          <!-- Afgeleide info (readonly) -->
+          <div class="form-group derived">
+            <label>Wandoppervlakte (m²)</label>
+            <div class="derived-value" id="wand-oppervlakte">—</div>
+          </div>
+
+          <div class="form-group derived">
+            <label>Profielbreedte (mm)</label>
+            <div class="derived-value" id="profiel-breedte-display">—</div>
+          </div>
+
+          <div class="form-group derived">
+            <label>Gipslagen per zijde</label>
+            <div class="derived-value" id="gips-lagen-display">—</div>
+          </div>
+
+          <div class="form-group derived">
+            <label>Isolatie</label>
+            <div class="derived-value" id="isolatie-display">—</div>
+          </div>
+        </div>
+
+        <!-- Extra opties (tonen als type gekozen) -->
+        <div class="extra-opties hidden" id="extra-opties">
+          <h3 class="section-sub">Materiaalspecificaties</h3>
+          <div class="specs-grid">
+
+            <!-- Rij 1: C-profiel lengte | HoH | U-profiel lengte -->
+            <div class="specs-rij">
+              <div class="form-group">
+                <label for="profiel-c-lengte">C-profiel lengte (mm)</label>
+                <select id="profiel-c-lengte">
+                  <option value="2400">2400 mm</option>
+                  <option value="2600">2600 mm</option>
+                  <option value="2800">2800 mm</option>
+                  <option value="3000">3000 mm</option>
+                  <option value="3200">3200 mm</option>                  
+                  <option value="3600">3600 mm</option>
+                  <option value="4000">4000 mm</option>
+                  <option value="4500">4500 mm</option>
+                  <option value="5000">5000 mm</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="hoh-afstand">Hart-op-hart afstand (m)</label>
+                <input type="number" id="hoh-afstand" value="0.6" step="0.05" min="0.3" max="1.2" />
+              </div>
+              <div class="form-group">
+                <label for="profiel-u-lengte">U-profiel lengte (mm)</label>
+                <select id="profiel-u-lengte">
+                  <option value="3600">3600 mm</option>
+                  <option value="4000">4000 mm</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Rij 2: Gipslengte | Gipsbreedte -->
+            <div class="specs-rij specs-rij-2col">
+              <div class="form-group">
+                <label for="gips-lengte">Gipslengte (mm)</label>
+                <select id="gips-lengte">
+                  <option value="2400">2400 mm</option>
+                  <option value="2500">2500 (osb) mm</option>
+                  <option value="2600">2600 mm</option>
+                  <option value="2800">2800 mm</option>
+                  <option value="3000">3000 mm</option>
+                  <option value="3200">3200 mm</option>
+                  <option value="3600">3600 mm</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="gips-breedte">Gipsbreedte (mm)</label>
+                <select id="gips-breedte">
+                  <option value="1200">1200 mm</option>
+                  <option value="600">600 mm</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Rij 3: Gipstype L2 | Gipstype L1 | Gipstype R1 | Gipstype R2 -->
+            <div class="specs-rij" id="gips-select-groep">
+              <div class="form-group" id="groep-links-2" style="display:none">
+                <label for="gips-type-links-2">Gipstype links — 2e laag</label>
+                <select id="gips-type-links-2">
+                <option value="standaard_ak">Standaard AK</option>
+                <option value="standaard_4ak">Standaard 4-AK (2400×1200)</option>
+                <option value="hydro">Hydro (groen)</option>
+                <option value="ladura">Ladura Standaard</option>
+                <option value="novlam">Novlam (roze)</option>
+                <option value="osb">OSB (2500×1250)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="gips-type-links-1">Gipstype links — 1e laag</label>
+                <select id="gips-type-links-1">
+                <option value="standaard_ak">Standaard AK</option>
+                <option value="standaard_4ak">Standaard 4-AK (2400×1200)</option>
+                <option value="hydro">Hydro (groen)</option>
+                <option value="ladura">Ladura Standaard</option>
+                <option value="novlam">Novlam (roze)</option>
+                <option value="osb">OSB (2500×1250)</option>
+                </select>
+              </div>
+              <div class="form-group" id="groep-rechts-1">
+                <label for="gips-type-rechts-1">Gipstype rechts — 1e laag</label>
+                <select id="gips-type-rechts-1">
+                <option value="standaard_ak">Standaard AK</option>
+                <option value="standaard_4ak">Standaard 4-AK (2400×1200)</option>
+                <option value="hydro">Hydro (groen)</option>
+                <option value="ladura">Ladura Standaard</option>
+                <option value="novlam">Novlam (roze)</option>
+                <option value="osb">OSB (2500×1250)</option>
+                </select>
+              </div>
+              <div class="form-group" id="groep-rechts-2" style="display:none">
+                <label for="gips-type-rechts-2">Gipstype rechts — 2e laag</label>
+                <select id="gips-type-rechts-2">
+                <option value="standaard_ak">Standaard AK</option>
+                <option value="standaard_4ak">Standaard 4-AK (2400×1200)</option>
+                <option value="hydro">Hydro (groen)</option>
+                <option value="ladura">Ladura Standaard</option>
+                <option value="novlam">Novlam (roze)</option>
+                <option value="osb">OSB (2500×1250)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Rij 4: Isolatiedikte -->
+            <div class="specs-rij specs-rij-1col">
+              <div class="form-group" id="isolatie-groep">
+                <label for="isolatie-dikte">Isolatiedikte (mm)</label>
+                <select id="isolatie-dikte">
+                  <option value="45">45 mm</option>
+                  <option value="60">60 mm</option>
+                </select>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="card-actions">
+          <button class="btn btn-primary" id="btn-add" disabled>+ Toevoegen aan lijst</button>
+          <div class="calc-status" id="calc-status"></div>
+        </div>
+      </section>
+
+      <!-- TABELLEN -->
+      <section class="results-section" id="results-section">
+
+        <!-- Algemene info -->
+        <div class="table-card">
+          <div class="table-header">
+            <h3>Wandoverzicht</h3>
+            <span class="table-count" id="count-wanden">0 wanden</span>
+          </div>
+          <div class="table-wrapper">
+            <table id="tabel-algemeen">
+              <thead>
+                <tr>
+                  <th>Omschrijving</th>
+                  <th>Type</th>
+                  <th>Lengte (m)</th>
+                  <th>Hoogte (m)</th>
+                  <th>Opp. (m²)</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="tbody-algemeen">
+                <tr class="empty-row"><td colspan="6">Nog geen wanden toegevoegd</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Totaaloverzicht — direct na wandoverzicht -->
+        <div class="table-card totalen-card">
+          <div class="table-header">
+            <h3>Totaaloverzicht <span class="tag">alle materialen</span></h3>
+          </div>
+          <div class="table-wrapper">
+            <table id="tabel-totalen">
+              <thead>
+                <tr>
+                  <th>Materiaal</th>
+                  <th>Aantal</th>
+                  <th>Eenheid</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="tbody-totalen">
+                <tr class="empty-row"><td colspan="4">Nog geen wanden toegevoegd</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+
+
+        <!-- Handmatig materiaal toevoegen -->
+        <div class="table-card no-print">
+          <div class="table-header">
+            <h3>Handmatig materiaal toevoegen</h3>
+          </div>
+          <div class="handmatig-invoer">
+
+            <!-- Rij 1: VU-profiel -->
+            <div class="handmatig-rij">
+              <div class="handmatig-label">VU-profiel</div>
+              <select id="vu-type" class="handmatig-select">
+                <option value="75">VU75</option>
+                <option value="50">VU50</option>
+              </select>
+              <input type="number" id="vu-aantal" placeholder="Aantal" min="0" step="1" />
+              <input type="number" id="vu-lengte" placeholder="Lengte (mm)" min="0" step="1" />
+            </div>
+
+            <div class="invoer-of-scheiding"><span>of</span></div>
+
+            <!-- Rij 2: Vrij materiaal -->
+            <div class="handmatig-rij">
+              <div class="handmatig-label">Overig</div>
+              <input type="text"   id="extra-omschrijving" placeholder="Omschrijving" class="input-breed" />
+              <input type="number" id="extra-aantal"       placeholder="Aantal" min="0" step="1" />
+              <input type="text"   id="extra-eenheid"      placeholder="Eenheid" />
+            </div>
+
+            <div class="handmatig-actie">
+              <button class="btn btn-primary" id="btn-handmatig-add">+ Toevoegen</button>
+              <span class="handmatig-hint">Vul VU-profiel <em>of</em> omschrijving in — niet beide</span>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Scheidingslijn gedetailleerd overzicht -->
+        <div class="sectie-scheiding">
+          <span>Gedetailleerd materiaaloverzicht</span>
+        </div>
+
+        <!-- U Profielen -->
+        <div class="table-card">
+          <div class="table-header">
+            <h3>U-profielen <span class="tag">onder- &amp; bovenregel</span></h3>
+          </div>
+          <div class="table-wrapper">
+            <table id="tabel-u">
+              <thead>
+                <tr>
+                  <th>Wand</th>
+                  <th>Breedte (mm)</th>
+                  <th>Lengte (mm)</th>
+                  <th>Aantal (st)</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-u">
+                <tr class="empty-row"><td colspan="4">—</td></tr>
+              </tbody>
+              <tfoot id="tfoot-u"></tfoot>
+            </table>
+          </div>
+        </div>
+
+        <!-- VU Profielen tabel (nu via Totaaloverzicht) -->
+        <div class="table-card" style="display:none">
+          <div class="table-header">
+            <h3>VU-profielen <span class="tag">kozijnen — optioneel</span></h3>
+          </div>
+          <div class="table-wrapper">
+            <table id="tabel-vu">
+              <thead>
+                <tr>
+                  <th>Wand</th>
+                  <th>Type</th>
+                  <th>Lengte (mm)</th>
+                  <th>Aantal (st)</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-vu">
+                <tr class="empty-row"><td colspan="4">—</td></tr>
+              </tbody>
+              <tfoot id="tfoot-vu"></tfoot>
+            </table>
+          </div>
+        </div>
+
+        <!-- C Profielen -->
+        <div class="table-card">
+          <div class="table-header">
+            <h3>C-profielen <span class="tag">verticaal</span></h3>
+          </div>
+          <div class="table-wrapper">
+            <table id="tabel-c">
+              <thead>
+                <tr>
+                  <th>Wand</th>
+                  <th>Breedte (mm)</th>
+                  <th>Lengte (mm)</th>
+                  <th>HoH (m)</th>
+                  <th>Aantal (st)</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-c">
+                <tr class="empty-row"><td colspan="5">—</td></tr>
+              </tbody>
+              <tfoot id="tfoot-c"></tfoot>
+            </table>
+          </div>
+        </div>
+
+        <!-- Gipskarton -->
+        <div class="table-card">
+          <div class="table-header">
+            <h3>Gipskarton</h3>
+          </div>
+          <div class="table-wrapper">
+            <table id="tabel-gips">
+              <thead>
+                <tr>
+                  <th>Wand</th>
+                  <th>Zijde / Laag</th>
+                  <th>Gipstype</th>
+                  <th>Lengte (mm)</th>
+                  <th>Breedte (mm)</th>
+                  <th>Plaat opp. (m²)</th>
+                  <th>Aantal (st)</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-gips">
+                <tr class="empty-row"><td colspan="7">—</td></tr>
+              </tbody>
+              <tfoot id="tfoot-gips"></tfoot>
+            </table>
+          </div>
+        </div>
+
+        <!-- Isolatie (alleen als van toepassing) -->
+        <div class="table-card" id="kaart-isolatie">
+          <div class="table-header">
+            <h3>Isolatie</h3>
+          </div>
+          <div class="table-wrapper">
+            <table id="tabel-isolatie">
+              <thead>
+                <tr>
+                  <th>Wand</th>
+                  <th>Dikte (mm)</th>
+                  <th>Plaat (mm)</th>
+                  <th>Plaat opp. (m²)</th>
+                  <th>Lagen</th>
+                  <th>Aantal (st)</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-isolatie">
+                <tr class="empty-row"><td colspan="6">—</td></tr>
+              </tbody>
+              <tfoot id="tfoot-isolatie"></tfoot>
+            </table>
+          </div>
+        </div>
+
+
+        <!-- Schroeven -->
+        <div class="table-card">
+          <div class="table-header">
+            <h3>Schroeven</h3>
+          </div>
+          <div class="table-wrapper">
+            <table id="tabel-schroeven">
+              <thead>
+                <tr>
+                  <th>Wand</th>
+                  <th>Laag</th>
+                  <th>Lengte (mm)</th>
+                  <th>Afstand lengte (mm)</th>
+                  <th>Aantal (st)</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-schroeven">
+                <tr class="empty-row"><td colspan="5">—</td></tr>
+              </tbody>
+              <tfoot id="tfoot-schroeven"></tfoot>
+            </table>
+          </div>
+        </div>
+
+
+      </section>
+
+    </main>
+  </div>
+
+  <script src="app.js?v=1772120920"></script>
+</body>
+</html>
