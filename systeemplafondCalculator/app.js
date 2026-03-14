@@ -3,6 +3,17 @@
  * Volledig lokaal — geen backend nodig.
  */
 
+'use strict';
+
+// ── Config ──────────────────────────────────────────────────────────────────
+const DEBOUNCE_DELAY      = 400;
+const STORAGE_KEY         = 'sp_ruimtes';
+const STORAGE_KEY_PROJECT = 'sp_project';
+const STORAGE_KEY_EXTRA   = 'sp_extra';
+const KLEUR_ZWART_HEX     = '#1C2B3A';
+const KLEUR_WIT_RAND_HEX  = '#CECCBF';
+const KLEUR_WIT_HEX       = '#ffffff';
+
 // ── Materiaalfactoren ──────────────────────────────────────────────────────
 
 const SYSTEMEN = {
@@ -52,15 +63,64 @@ const MATERIAAL_VOLGORDE = [
 // ── State ──────────────────────────────────────────────────────────────────
 
 let gekozenSysteem  = null;   // '600x600' | '600x1200'
-var extraMaterialen  = [];    // handmatig toegevoegde items
+let extraMaterialen  = [];    // handmatig toegevoegde items
 let gekozenKleur    = 'wit';  // 'wit' | 'zwart'
-let gekozenMerk     = '';     // string
 let invoerModus     = 'sqm';  // 'sqm' | 'dimensions'
 let ruimtes         = [];
 let debounceTimer   = null;
 
+
+// ── DOM cache ───────────────────────────────────────────────────────────────
+
+const DOM = {
+  // Invoer
+  ruimteNaam:        () => document.getElementById('ruimte-naam'),
+  sqmInput:          () => document.getElementById('vierkante-meters'),
+  lengteInput:       () => document.getElementById('lengte'),
+  breedteInput:      () => document.getElementById('breedte'),
+  omtrekInput:       () => document.getElementById('strekkende-meters'),
+  sqmInputGroup:     () => document.getElementById('sqm-input-group'),
+  lengteInputGroup:  () => document.getElementById('lengte-input-group'),
+  breedteInputGroup: () => document.getElementById('breedte-input-group'),
+  berekendeGroup:    () => document.getElementById('berekende-sqm-group'),
+  berekendeVal:      () => document.getElementById('berekende-sqm'),
+  plaatMerk:         () => document.getElementById('plaat-merk'),
+  plaatMerkAnders:   () => document.getElementById('plaat-merk-anders'),
+  projectNaam:       () => document.getElementById('project-naam'),
+  // Knoppen / status
+  btnToevoegen:      () => document.getElementById('btn-toevoegen'),
+  btnAllesReset:     () => document.getElementById('btn-alles-reset'),
+  btnHandmatigAdd:   () => document.getElementById('btn-handmatig-add'),
+  calcStatus:        () => document.getElementById('calc-status'),
+  // Resultaten
+  resultsSection:    () => document.getElementById('results-section'),
+  countRuimtes:      () => document.getElementById('count-ruimtes'),
+  ruimtesTbody:      () => document.getElementById('ruimtes-tbody'),
+  totalSqm:          () => document.getElementById('total-sqm'),
+  totalOmtrek:       () => document.getElementById('total-omtrek'),
+  tbodyTotalen:      () => document.getElementById('tbody-totalen'),
+  // Handmatig materiaal
+  extraOmschrijving: () => document.getElementById('extra-omschrijving'),
+  extraAantal:       () => document.getElementById('extra-aantal'),
+  extraEenheid:      () => document.getElementById('extra-eenheid'),
+};
+
 // ── Berekening ─────────────────────────────────────────────────────────────
 
+/**
+ * Berekent alle materialenhoeveelheden voor één ruimte.
+ * @param {number} sqm       - Oppervlakte in m²
+ * @param {number} omtrek    - Omtrek / randlengte in m
+ * @param {'600x600'|'600x1200'} systeemId
+ * @returns {{
+ *   plafondplaten: number,
+ *   hoofdprofielen: number,
+ *   tussenprofiel_1200: number,
+ *   tussenprofiel_600: number|null,
+ *   hoeklijn: number,
+ *   kantlat: number
+ * }}
+ */
 function bereken(sqm, omtrek, systeemId) {
   const f = SYSTEMEN[systeemId].factoren;
   return {
@@ -75,23 +135,26 @@ function bereken(sqm, omtrek, systeemId) {
 
 // ── Invoer lezen ───────────────────────────────────────────────────────────
 
+/** @returns {number} Oppervlakte in m² op basis van actieve invoermodus (0 als leeg/ongeldig) */
 function getSqm() {
   if (invoerModus === 'sqm') {
-    return parseFloat(document.getElementById('vierkante-meters').value) || 0;
+    return parseFloat(DOM.sqmInput().value) || 0;
   }
-  const l = parseFloat(document.getElementById('lengte').value)  || 0;
-  const b = parseFloat(document.getElementById('breedte').value) || 0;
+  const l = parseFloat(DOM.lengteInput().value)  || 0;
+  const b = parseFloat(DOM.breedteInput().value) || 0;
   return (l > 0 && b > 0) ? l * b : 0;
 }
 
+/** @returns {number} Omtrek in m (0 als leeg/ongeldig) */
 function getOmtrek() {
-  return parseFloat(document.getElementById('strekkende-meters').value) || 0;
+  return parseFloat(DOM.omtrekInput().value) || 0;
 }
 
+/** @returns {string} Plaatmerk/-type, of de vrije-tekst waarde als 'anders' geselecteerd is */
 function getMerk() {
-  const sel = document.getElementById('plaat-merk').value;
+  const sel = DOM.plaatMerk().value;
   if (sel === 'anders') {
-    return document.getElementById('plaat-merk-anders').value.trim();
+    return DOM.plaatMerkAnders().value.trim();
   }
   return sel;
 }
@@ -99,15 +162,14 @@ function getMerk() {
 // ── Statusbalk ─────────────────────────────────────────────────────────────
 
 function updateStatus() {
-  const knop    = document.getElementById('btn-toevoegen');
-  const status  = document.getElementById('calc-status');
+  const knop    = DOM.btnToevoegen();
+  const status  = DOM.calcStatus();
   const sqm     = getSqm();
   const omtrek  = getOmtrek();
-  const merk    = getMerk();
 
   function setStatus(tekst, cls) {
     status.textContent = tekst;
-    status.className   = 'calc-status' + (cls ? ' ' + cls : '');
+    status.className   = cls ? `calc-status ${cls}` : 'calc-status';
   }
 
   if (!gekozenSysteem) {
@@ -126,18 +188,64 @@ function updateStatus() {
 
 function debounceUpdate() {
   clearTimeout(debounceTimer);
-  debounceTimer = setTimeout(updateStatus, 400);
+  debounceTimer = setTimeout(updateStatus, DEBOUNCE_DELAY);
+}
+
+// ── Inline veldvalidatie ─────────────────────────────────────────────────────
+
+/**
+ * Markeert een inputveld als ongeldig en toont een foutmelding eronder.
+ * @param {HTMLInputElement} el
+ * @param {string} msg
+ */
+function toonFout(el, msg) {
+  el.classList.add('invalid');
+  const foutId = (el.id || 'veld') + '-fout';
+  let fout = el.parentElement.querySelector('.field-error-msg');
+  if (!fout) {
+    fout = document.createElement('span');
+    fout.className = 'field-error-msg';
+    fout.setAttribute('role', 'alert');
+    fout.id = foutId;
+    el.after(fout);
+  }
+  fout.textContent = msg;
+  el.setAttribute('aria-describedby', foutId);
+  el.setAttribute('aria-invalid', 'true');
+}
+
+/** @param {HTMLInputElement} el */
+function verbergFout(el) {
+  el.classList.remove('invalid');
+  el.removeAttribute('aria-describedby');
+  el.removeAttribute('aria-invalid');
+  const fout = el.parentElement.querySelector('.field-error-msg');
+  if (fout) fout.remove();
+}
+
+/**
+ * Toont of verbergt een inline foutmelding afhankelijk van de conditie.
+ * @param {HTMLInputElement} el
+ * @param {boolean} conditie - `true` = geldig (geen fout)
+ * @param {string} msg
+ */
+function valideerVeld(el, conditie, msg) {
+  if (!conditie) toonFout(el, msg);
+  else verbergFout(el);
 }
 
 // ── Helpers weergave ───────────────────────────────────────────────────────
 
+/**
+ * Genereert een inline HTML kleurblokje met label.
+ * @param {'wit'|'zwart'} kleur
+ * @returns {string} HTML string
+ */
 function kleurSwatch(kleur) {
-  var bg   = kleur === 'zwart' ? '#1C2B3A' : '#ffffff';
-  var rand = kleur === 'zwart' ? '#1C2B3A' : '#CECCBF';
-  var cap  = kleur.charAt(0).toUpperCase() + kleur.slice(1);
-  return '<span style="display:inline-block;width:11px;height:11px;border-radius:2px;' +
-         'background:' + bg + ';border:1.5px solid ' + rand + ';' +
-         'vertical-align:middle;margin-right:5px;"></span>' + cap;
+  const bg   = kleur === 'zwart' ? KLEUR_ZWART_HEX : KLEUR_WIT_HEX;
+  const rand = kleur === 'zwart' ? KLEUR_ZWART_HEX : KLEUR_WIT_RAND_HEX;
+  const cap  = kleur.charAt(0).toUpperCase() + kleur.slice(1);
+  return `<span style="display:inline-block;width:11px;height:11px;border-radius:2px;background:${bg};border:1.5px solid ${rand};vertical-align:middle;margin-right:5px;"></span>${cap}`;
 }
 
 function fmtSqm(n) {
@@ -156,15 +264,15 @@ function esc(str) {
 // ── Tabel renderen ─────────────────────────────────────────────────────────
 
 function renderTabel() {
-  var resultsEl = document.getElementById('results-section');
-  var countEl   = document.getElementById('count-ruimtes');
-  var tbody     = document.getElementById('ruimtes-tbody');
-  var totSqmEl  = document.getElementById('total-sqm');
-  var totOmEl   = document.getElementById('total-omtrek');
-  var totaalEl  = document.getElementById('tbody-totalen');
+  const resultsEl = DOM.resultsSection();
+  const countEl   = DOM.countRuimtes();
+  const tbody     = DOM.ruimtesTbody();
+  const totSqmEl  = DOM.totalSqm();
+  const totOmEl   = DOM.totalOmtrek();
+  const totaalEl  = DOM.tbodyTotalen();
 
   resultsEl.style.display = ruimtes.length > 0 ? 'flex' : 'none';
-  countEl.textContent = ruimtes.length + ' ruimte' + (ruimtes.length !== 1 ? 's' : '');
+  countEl.textContent = `${ruimtes.length} ruimte${ruimtes.length !== 1 ? 's' : ''}`;
 
   if (ruimtes.length === 0) {
     tbody.innerHTML    = '<tr class="empty-row"><td colspan="13">Nog geen ruimtes toegevoegd</td></tr>';
@@ -175,42 +283,29 @@ function renderTabel() {
   }
 
   // Ruimterijen
-  var html = '';
-  for (var i = 0; i < ruimtes.length; i++) {
-    var r   = ruimtes[i];
-    var res = r.resultaten;
-    html += '<tr>' +
-      '<td>' + esc(r.naam) + '</td>' +
-      '<td>' + SYSTEMEN[r.systeem].label + '</td>' +
-      '<td style="max-width:110px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="' + esc(r.merk) + '">' + esc(r.merk || '\u2014') + '</td>' +
-      '<td>' + kleurSwatch(r.kleur) + '</td>' +
-      '<td class="num">' + fmtSqm(r.sqm) + '</td>' +
-      '<td class="num">' + r.omtrek + '</td>' +
-      '<td class="num">' + res.plafondplaten + '</td>' +
-      '<td class="num">' + res.hoofdprofielen + '</td>' +
-      '<td class="num">' + res.tussenprofiel_1200 + '</td>' +
-      '<td class="num">' + (res.tussenprofiel_600 !== null ? res.tussenprofiel_600 : '\u2014') + '</td>' +
-      '<td class="num">' + res.hoeklijn + '</td>' +
-      '<td class="num">' + res.kantlat + '</td>' +
-      '<td><button class="btn-delete-room" data-id="' + r.id + '" title="Verwijder">\u2715</button></td>' +
-      '</tr>';
-  }
-  tbody.innerHTML = html;
+  tbody.innerHTML = ruimtes.map(r => {
+    const res = r.resultaten;
+    return `<tr>
+      <td>${esc(r.naam)}</td>
+      <td>${SYSTEMEN[r.systeem].label}</td>
+      <td style="max-width:110px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${esc(r.merk)}">${esc(r.merk || '—')}</td>
+      <td>${kleurSwatch(r.kleur)}</td>
+      <td class="num">${fmtSqm(r.sqm)}</td>
+      <td class="num">${r.omtrek}</td>
+      <td class="num">${res.plafondplaten}</td>
+      <td class="num">${res.hoofdprofielen}</td>
+      <td class="num">${res.tussenprofiel_1200}</td>
+      <td class="num">${res.tussenprofiel_600 !== null ? res.tussenprofiel_600 : '—'}</td>
+      <td class="num">${res.hoeklijn}</td>
+      <td class="num">${res.kantlat}</td>
+      <td><button class="btn-delete-room" data-id="${r.id}" title="Verwijder" aria-label="Ruimte '${esc(r.naam)}' verwijderen">✕</button></td>
+    </tr>`;
+  }).join('');
 
-  // Delete listeners
-  var delBtns = tbody.querySelectorAll('.btn-delete-room');
-  for (var d = 0; d < delBtns.length; d++) {
-    delBtns[d].addEventListener('click', function() {
-      verwijderRuimte(Number(this.dataset.id));
-    });
-  }
 
   // Totaalrij
-  var totSqm = 0, totOmtrek = 0;
-  for (var j = 0; j < ruimtes.length; j++) {
-    totSqm    += ruimtes[j].sqm;
-    totOmtrek += ruimtes[j].omtrek;
-  }
+  const totSqm    = ruimtes.reduce((s, r) => s + r.sqm,    0);
+  const totOmtrek = ruimtes.reduce((s, r) => s + r.omtrek, 0);
   totSqmEl.textContent = fmtSqm(totSqm);
   totOmEl.textContent  = totOmtrek;
 
@@ -220,26 +315,25 @@ function renderTabel() {
 // ── Totaaloverzicht ────────────────────────────────────────────────────────
 
 function renderTotaalTabel() {
-  var totaalEl = document.getElementById('tbody-totalen');
+  const totaalEl = DOM.tbodyTotalen();
 
   // Bouw map op: key → {materiaal, merk, maat, kleur, aantal}
-  var map = {};
+  const map = {};
 
   function add(materiaal, subkey, merk, maat, kleur, n) {
-    var key = materiaal + '||' + subkey;
+    const key = materiaal + '||' + subkey;
     if (!map[key]) {
       map[key] = { materiaal: materiaal, merk: merk, maat: maat, kleur: kleur, aantal: 0 };
     }
     map[key].aantal += n;
   }
 
-  for (var i = 0; i < ruimtes.length; i++) {
-    var r   = ruimtes[i];
-    var res = r.resultaten;
-    var sys = SYSTEMEN[r.systeem];
+  for (const r of ruimtes) {
+    const res = r.resultaten;
+    const sys = SYSTEMEN[r.systeem];
 
     add('Plafondplaten',      r.merk + '|' + sys.plaatMaat, r.merk, sys.plaatMaat, null, res.plafondplaten);
-    var profielMerk = PROFIEL_MERKEN[r.systeem] || '';
+    const profielMerk = PROFIEL_MERKEN[r.systeem] || '';
     add('Hoofdprofielen',       r.kleur, profielMerk, '3600 mm', r.kleur, res.hoofdprofielen);
     add('Tussenprofielen 1200', r.kleur, profielMerk, '1200 mm', r.kleur, res.tussenprofiel_1200);
     if (res.tussenprofiel_600 !== null) {
@@ -250,55 +344,52 @@ function renderTotaalTabel() {
   }
 
   // Sorteer op vaste volgorde
-  var keys = Object.keys(map);
-  keys.sort(function(a, b) {
-    var ia = MATERIAAL_VOLGORDE.indexOf(map[a].materiaal);
-    var ib = MATERIAAL_VOLGORDE.indexOf(map[b].materiaal);
+  const keys = Object.keys(map);
+  keys.sort((a, b) => {
+    const ia = MATERIAAL_VOLGORDE.indexOf(map[a].materiaal);
+    const ib = MATERIAAL_VOLGORDE.indexOf(map[b].materiaal);
     if (ia !== ib) return ia - ib;
     return a.localeCompare(b);
   });
 
-  var html = '';
-  var huidigMateriaal = null;
+  let html = '';
+  let huidigMateriaal = null;
 
-  for (var k = 0; k < keys.length; k++) {
-    var item = map[keys[k]];
+  for (const key of keys) {
+    const item = map[key];
 
     if (item.materiaal !== huidigMateriaal) {
       huidigMateriaal = item.materiaal;
-      html += '<tr class="totaal-categorie-header"><td colspan="6">' + esc(item.materiaal) + '</td></tr>';
+      html += `<tr class="totaal-categorie-header"><td colspan="6">${esc(item.materiaal)}</td></tr>`;
     }
 
-    var kleurCel = item.kleur
+    const kleurCel = item.kleur
       ? kleurSwatch(item.kleur)
       : '<span style="color:var(--ink-3)">\u2014</span>';
 
-    var merkCel = item.merk
+    const merkCel = item.merk
       ? esc(item.merk)
       : '<span style="color:var(--ink-3)">\u2014</span>';
 
-    html += '<tr>' +
-      '<td>' + esc(item.materiaal) + '</td>' +
-      '<td>' + merkCel + '</td>' +
-      '<td class="num">' + esc(item.maat) + '</td>' +
-      '<td>' + kleurCel + '</td>' +
-      '<td class="num">' + item.aantal + '</td>' +
-      '<td>st</td>' +
-      '</tr>';
+    html += `<tr>
+      <td>${esc(item.materiaal)}</td>
+      <td>${merkCel}</td>
+      <td class="num">${esc(item.maat)}</td>
+      <td>${kleurCel}</td>
+      <td class="num">${item.aantal}</td>
+      <td>st</td>
+    </tr>`;
   }
 
   // ── Handmatig toegevoegde materialen ─────────────────────────────────────
   if (extraMaterialen.length > 0) {
     html += '<tr class="totaal-categorie-header totaal-header-extra"><td colspan="6">Handmatig toegevoegd</td></tr>';
-    for (var e = 0; e < extraMaterialen.length; e++) {
-      var em = extraMaterialen[e];
-      html += '<tr class="extra-rij">' +
-        '<td colspan="4">' + esc(em.omschrijving) + '</td>' +
-        '<td class="num">' + em.aantal + '</td>' +
-        '<td>' + esc(em.eenheid) + ' ' +
-          '<button class="btn-delete-room" style="margin-left:4px;" onclick="verwijderExtra(' + em.id + ')" title="Verwijder">✕</button>' +
-        '</td>' +
-        '</tr>';
+    for (const em of extraMaterialen) {
+      html += `<tr class="extra-rij">
+        <td colspan="4">${esc(em.omschrijving)}</td>
+        <td class="num">${em.aantal}</td>
+        <td>${esc(em.eenheid)} <button class="btn-delete-room" data-action="verwijder-extra" data-id="${em.id}" style="margin-left:4px;" title="Verwijder" aria-label="'${esc(em.omschrijving)}' verwijderen">✕</button></td>
+      </tr>`;
     }
   }
 
@@ -308,14 +399,14 @@ function renderTotaalTabel() {
 // ── Toevoegen / verwijderen ────────────────────────────────────────────────
 
 function voegToe() {
-  var sqm    = getSqm();
-  var omtrek = getOmtrek();
-  var merk   = getMerk();
+  const sqm    = getSqm();
+  const omtrek = getOmtrek();
+  const merk   = getMerk();
 
   if (!gekozenSysteem || sqm <= 0 || omtrek <= 0) return;
 
-  var naamInput = document.getElementById('ruimte-naam');
-  var naam = naamInput.value.trim() || ('Ruimte ' + (ruimtes.length + 1));
+  const naamInput = DOM.ruimteNaam();
+  const naam = naamInput.value.trim() || `Ruimte ${ruimtes.length + 1}`;
 
   ruimtes.push({
     id:         Date.now(),
@@ -333,35 +424,40 @@ function voegToe() {
   resetInvoer();
 }
 
+/** @param {number} id - timestamp-id van de te verwijderen ruimte */
 function verwijderRuimte(id) {
-  ruimtes = ruimtes.filter(function(r) { return r.id !== id; });
+  ruimtes = ruimtes.filter(r => r.id !== id);
   slaOp();
   renderTabel();
 }
 
 function resetInvoer() {
-  var volgend = ruimtes.length + 1;
-  document.getElementById('ruimte-naam').value         = 'Ruimte ' + volgend;
-  document.getElementById('vierkante-meters').value    = '';
-  document.getElementById('lengte').value              = '';
-  document.getElementById('breedte').value             = '';
-  document.getElementById('strekkende-meters').value   = '';
-  document.getElementById('berekende-sqm').textContent = '\u2014';
-  document.getElementById('btn-toevoegen').disabled    = true;
-  document.getElementById('calc-status').textContent   = '';
-  document.getElementById('calc-status').className     = 'calc-status';
-  document.getElementById('vierkante-meters').focus();
+  const volgend = ruimtes.length + 1;
+  DOM.ruimteNaam().value         = `Ruimte ${volgend}`;
+  DOM.sqmInput().value    = '';
+  DOM.lengteInput().value              = '';
+  DOM.breedteInput().value             = '';
+  DOM.omtrekInput().value   = '';
+  DOM.berekendeVal().textContent = '\u2014';
+  DOM.btnToevoegen().disabled    = true;
+  DOM.calcStatus().textContent   = '';
+  DOM.calcStatus().className     = 'calc-status';
+  DOM.sqmInput().focus();
 }
 
 // ── Invoermodus ────────────────────────────────────────────────────────────
 
+/**
+ * Schakelt tussen m²-invoer en L×B-invoer en past de UI aan.
+ * @param {'sqm'|'dimensions'} modus
+ */
 function setInvoerModus(modus) {
   invoerModus = modus;
-  var isDim = modus === 'dimensions';
-  document.getElementById('sqm-input-group').style.display       = isDim ? 'none' : '';
-  document.getElementById('lengte-input-group').style.display    = isDim ? '' : 'none';
-  document.getElementById('breedte-input-group').style.display   = isDim ? '' : 'none';
-  document.getElementById('berekende-sqm-group').style.display   = isDim ? '' : 'none';
+  const isDim = modus === 'dimensions';
+  DOM.sqmInputGroup().style.display       = isDim ? 'none' : '';
+  DOM.lengteInputGroup().style.display    = isDim ? '' : 'none';
+  DOM.breedteInputGroup().style.display   = isDim ? '' : 'none';
+  DOM.berekendeGroup().style.display   = isDim ? '' : 'none';
   updateStatus();
 }
 
@@ -369,19 +465,19 @@ function setInvoerModus(modus) {
 
 function slaOp() {
   try {
-    localStorage.setItem('sp_ruimtes', JSON.stringify(ruimtes));
-    localStorage.setItem('sp_project', document.getElementById('project-naam').value);
-    localStorage.setItem('sp_extra', JSON.stringify(extraMaterialen));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(ruimtes));
+    localStorage.setItem(STORAGE_KEY_PROJECT, DOM.projectNaam().value);
+    localStorage.setItem(STORAGE_KEY_EXTRA, JSON.stringify(extraMaterialen));
   } catch(e) {}
 }
 
 function laadOp() {
   try {
-    var opgeslagenRuimtes  = localStorage.getItem('sp_ruimtes');
-    var opgeslagenProject  = localStorage.getItem('sp_project');
-    var opgeslagenExtra    = localStorage.getItem('sp_extra');
+    const opgeslagenRuimtes  = localStorage.getItem(STORAGE_KEY);
+    const opgeslagenProject  = localStorage.getItem(STORAGE_KEY_PROJECT);
+    const opgeslagenExtra    = localStorage.getItem(STORAGE_KEY_EXTRA);
     if (opgeslagenRuimtes) ruimtes = JSON.parse(opgeslagenRuimtes);
-    if (opgeslagenProject) document.getElementById('project-naam').value = opgeslagenProject;
+    if (opgeslagenProject) DOM.projectNaam().value = opgeslagenProject;
     if (opgeslagenExtra)   extraMaterialen = JSON.parse(opgeslagenExtra);
   } catch(e) {}
 }
@@ -391,10 +487,10 @@ function resetAlles() {
       !confirm('Alle ruimtes, handmatige items en projectnaam verwijderen?')) return;
   ruimtes = [];
   extraMaterialen = [];
-  document.getElementById('project-naam').value = '';
-  localStorage.removeItem('sp_ruimtes');
-  localStorage.removeItem('sp_project');
-  localStorage.removeItem('sp_extra');
+  DOM.projectNaam().value = '';
+  try { localStorage.removeItem(STORAGE_KEY);         } catch(e) {}
+  try { localStorage.removeItem(STORAGE_KEY_PROJECT); } catch(e) {}
+  try { localStorage.removeItem(STORAGE_KEY_EXTRA);   } catch(e) {}
   renderTabel();
   resetInvoer();
 }
@@ -402,13 +498,13 @@ function resetAlles() {
 // ── Handmatig materiaal toevoegen ────────────────────────────────────────────
 
 function voegHandmatigToe() {
-  var omschrijving = document.getElementById('extra-omschrijving').value.trim();
-  var aantalRaw    = document.getElementById('extra-aantal').value;
-  var eenheid      = document.getElementById('extra-eenheid').value.trim() || 'st';
-  var aantal       = parseFloat(aantalRaw);
+  const omschrijving = DOM.extraOmschrijving().value.trim();
+  const aantalRaw    = DOM.extraAantal().value;
+  const eenheid      = DOM.extraEenheid().value.trim() || 'st';
+  const aantal       = parseFloat(aantalRaw);
 
   if (!omschrijving || isNaN(aantal) || aantal <= 0) {
-    document.getElementById('extra-omschrijving').focus();
+    DOM.extraOmschrijving().focus();
     return;
   }
 
@@ -419,117 +515,141 @@ function voegHandmatigToe() {
     eenheid:      eenheid,
   });
 
-  document.getElementById('extra-omschrijving').value = '';
-  document.getElementById('extra-aantal').value       = '';
-  document.getElementById('extra-eenheid').value      = '';
+  DOM.extraOmschrijving().value = '';
+  DOM.extraAantal().value       = '';
+  DOM.extraEenheid().value      = '';
 
   slaOp();
   renderTotaalTabel();
 }
 
 function verwijderExtra(id) {
-  extraMaterialen = extraMaterialen.filter(function(e) { return e.id !== id; });
+  extraMaterialen = extraMaterialen.filter(e => e.id !== id);
   slaOp();
   renderTotaalTabel();
 }
 
 // ── Init ───────────────────────────────────────────────────────────────────
 
-window.addEventListener('load', function() {
+window.addEventListener('load', () => {
 
   laadOp();
   renderTabel();
 
   // Systeemknoppen
-  var systeemBtns = document.querySelectorAll('[data-system]');
-  for (var i = 0; i < systeemBtns.length; i++) {
-    systeemBtns[i].addEventListener('click', function() {
-      gekozenSysteem = this.dataset.system;
-      for (var j = 0; j < systeemBtns.length; j++) {
-        systeemBtns[j].classList.remove('active');
-      }
-      this.classList.add('active');
+  const systeemBtns = document.querySelectorAll('[data-system]');
+  systeemBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      gekozenSysteem = btn.dataset.system;
+      systeemBtns.forEach(b => { b.classList.remove('active'); b.setAttribute('aria-pressed', 'false'); });
+      btn.classList.add('active');
+      btn.setAttribute('aria-pressed', 'true');
       updateStatus();
     });
-  }
+  });
 
   // Kleurknoppen
-  var kleurBtns = document.querySelectorAll('[data-kleur]');
-  for (var i = 0; i < kleurBtns.length; i++) {
-    kleurBtns[i].addEventListener('click', function() {
-      gekozenKleur = this.dataset.kleur;
-      for (var j = 0; j < kleurBtns.length; j++) {
-        kleurBtns[j].classList.remove('active');
-      }
-      this.classList.add('active');
+  const kleurBtns = document.querySelectorAll('[data-kleur]');
+  kleurBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      gekozenKleur = btn.dataset.kleur;
+      kleurBtns.forEach(b => { b.classList.remove('active'); b.setAttribute('aria-pressed', 'false'); });
+      btn.classList.add('active');
+      btn.setAttribute('aria-pressed', 'true');
       updateStatus();
     });
-  }
+  });
 
   // Plaatmerk select
-  document.getElementById('plaat-merk').addEventListener('change', function() {
-    var isAnders = this.value === 'anders';
-    document.getElementById('plaat-merk-anders').style.display = isAnders ? '' : 'none';
+  DOM.plaatMerk().addEventListener('change', e => {
+    const isAnders = e.target.value === 'anders';
+    DOM.plaatMerkAnders().style.display = isAnders ? '' : 'none';
     if (isAnders) {
-      document.getElementById('plaat-merk-anders').focus();
+      DOM.plaatMerkAnders().focus();
     }
     updateStatus();
   });
 
-  document.getElementById('plaat-merk-anders').addEventListener('input', debounceUpdate);
+  DOM.plaatMerkAnders().addEventListener('input', debounceUpdate);
 
   // Invoermodus radio
-  var modeRadios = document.querySelectorAll('input[name="input-mode"]');
-  for (var i = 0; i < modeRadios.length; i++) {
-    modeRadios[i].addEventListener('change', function() {
-      setInvoerModus(this.value);
-    });
-  }
+  const modeRadios = document.querySelectorAll('input[name="input-mode"]');
+  modeRadios.forEach(radio => {
+    radio.addEventListener('change', e => setInvoerModus(e.target.value));
+  });
 
   // Numerieke inputs
-  var numInputs = [
-    document.getElementById('vierkante-meters'),
-    document.getElementById('lengte'),
-    document.getElementById('breedte'),
-    document.getElementById('strekkende-meters')
-  ];
-  for (var i = 0; i < numInputs.length; i++) {
-    numInputs[i].addEventListener('input', function() {
+  const elSqm    = DOM.sqmInput();
+  const elLengte = DOM.lengteInput();
+  const elBreedte= DOM.breedteInput();
+  const elOmtrek = DOM.omtrekInput();
+  const numInputs = [elSqm, elLengte, elBreedte, elOmtrek];
+  numInputs.forEach(el => {
+    el.addEventListener('input', e => {
       if (invoerModus === 'dimensions') {
-        var l = parseFloat(document.getElementById('lengte').value)  || 0;
-        var b = parseFloat(document.getElementById('breedte').value) || 0;
-        document.getElementById('berekende-sqm').textContent =
+        const l = parseFloat(DOM.lengteInput().value)  || 0;
+        const b = parseFloat(DOM.breedteInput().value) || 0;
+        DOM.berekendeVal().textContent =
           (l > 0 && b > 0) ? (l * b).toFixed(2) + ' m\u00b2' : '\u2014';
       }
+      // Fout verbergen zodra waarde geldig wordt tijdens typen
+      if (parseFloat(e.target.value) > 0) verbergFout(e.target);
       debounceUpdate();
     });
-  }
+  });
+
+  // Blur-validatie voor verplichte numerieke velden
+  elSqm.addEventListener('blur', () => {
+    if (invoerModus !== 'sqm') return;
+    valideerVeld(elSqm, parseFloat(elSqm.value) > 0, 'Voer een geldige oppervlakte in (bijv. 20)');
+  });
+  elLengte.addEventListener('blur', () => {
+    if (invoerModus !== 'dimensions') return;
+    valideerVeld(elLengte, parseFloat(elLengte.value) > 0, 'Voer een geldige lengte in (bijv. 5)');
+  });
+  elBreedte.addEventListener('blur', () => {
+    if (invoerModus !== 'dimensions') return;
+    valideerVeld(elBreedte, parseFloat(elBreedte.value) > 0, 'Voer een geldige breedte in (bijv. 4)');
+  });
+  elOmtrek.addEventListener('blur', () => {
+    valideerVeld(elOmtrek, parseFloat(elOmtrek.value) > 0, 'Voer een geldige omtrek in (bijv. 18)');
+  });
+
+  // Event delegation voor verwijder-knoppen in ruimteoverzicht
+  DOM.ruimtesTbody().addEventListener('click', e => {
+    const btn = e.target.closest('.btn-delete-room');
+    if (btn) verwijderRuimte(Number(btn.dataset.id));
+  });
+
+  // Event delegation voor delete-knop handmatig materiaal
+  DOM.tbodyTotalen().addEventListener('click', e => {
+    const btn = e.target.closest('[data-action="verwijder-extra"]');
+    if (btn) verwijderExtra(Number(btn.dataset.id));
+  });
 
   // Handmatig toevoegen
-  document.getElementById('btn-handmatig-add').addEventListener('click', voegHandmatigToe);
+  DOM.btnHandmatigAdd().addEventListener('click', voegHandmatigToe);
 
   // Enter in handmatig velden
-  var handmatigInputs = [
-    document.getElementById('extra-omschrijving'),
-    document.getElementById('extra-aantal'),
-    document.getElementById('extra-eenheid')
+  const handmatigInputs = [
+    DOM.extraOmschrijving(),
+    DOM.extraAantal(),
+    DOM.extraEenheid()
   ];
-  for (var i = 0; i < handmatigInputs.length; i++) {
-    handmatigInputs[i].addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') voegHandmatigToe();
-    });
-  }
+  handmatigInputs.forEach(el => {
+    el.addEventListener('keydown', e => { if (e.key === 'Enter') voegHandmatigToe(); });
+  });
 
   // Toevoegen
-  document.getElementById('btn-toevoegen').addEventListener('click', voegToe);
+  DOM.btnToevoegen().addEventListener('click', voegToe);
 
   // Reset alles
-  document.getElementById('btn-alles-reset').addEventListener('click', resetAlles);
+  DOM.btnAllesReset().addEventListener('click', resetAlles);
 
   // Projectnaam opslaan
-  document.getElementById('project-naam').addEventListener('input', slaOp);
+  DOM.projectNaam().addEventListener('input', slaOp);
 
   // Initiële statusmelding
-  document.getElementById('calc-status').textContent = 'Kies een systeemtype om te beginnen';
+  DOM.calcStatus().textContent = 'Kies een systeemtype om te beginnen';
 
 });

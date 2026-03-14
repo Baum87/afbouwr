@@ -6,13 +6,22 @@
 'use strict';
 
 // ─── CONFIG ────────────────────────────────────────────────────────────────
-const API_URL = 'https://jouw-backend.render.com/api/metalstud-wand/bereken'; // ← AANPASSEN
 const DEBOUNCE_DELAY = 500;
 const STORAGE_KEY = 'metalstud_wand_wanden';
 const STORAGE_KEY_PROJECT = 'metalstud_wand_project';
 const STORAGE_KEY_EXTRA   = 'metalstud_wand_extra';
-const ISOLATIE_LENGTE = 1350; // mm — vast
-const ISOLATIE_BREEDTE = 600; // mm — vast
+const ISOLATIE_LENGTE = 1350;     // mm — vast
+const ISOLATIE_BREEDTE = 600;    // mm — vast
+const HOH_AFSTAND_DEFAULT = 0.6; // m  — standaard hart-op-hart afstand
+
+// Schroefpatronen — vaste configuratie gedeeld door alle wandtypes
+const SCHROEF_1LAAG = [
+  { laag: 1, lengte: 25, afstand_lengte: 250, afstand_breedte: 590 },
+];
+const SCHROEF_2LAAGS = [
+  { laag: 1, lengte: 25, afstand_lengte: 750, afstand_breedte: 590 },
+  { laag: 2, lengte: 35, afstand_lengte: 250, afstand_breedte: 590 },
+];
 
 /** Wand-type configuratie — eenvoudig uit te breiden
  *
@@ -28,69 +37,49 @@ const WAND_TYPES = {
     label: 'MS75 1.50.1', dikte: 75,
     gips_links: 1, profiel_breedte: 50, gips_rechts: 1,
     isolatie: false, isolatie_lagen: 0, max_isolatie_dikte: null,
-    schroeven: [
-      { laag: 1, lengte: 25, afstand_lengte: 250, afstand_breedte: 590 },
-    ],
+    schroeven: SCHROEF_1LAAG,
   },
   MS100_2_50_2: {
     label: 'MS100 2.50.2', dikte: 100,
     gips_links: 2, profiel_breedte: 50, gips_rechts: 2,
     isolatie: 'A', isolatie_lagen: 0, max_isolatie_dikte: null,
-    schroeven: [
-      { laag: 1, lengte: 25, afstand_lengte: 750, afstand_breedte: 590 },
-      { laag: 2, lengte: 35, afstand_lengte: 250, afstand_breedte: 590 },
-    ],
+    schroeven: SCHROEF_2LAAGS,
   },
   MS100_2_50_2A: {
     label: 'MS100 2.50.2A', dikte: 100,
     gips_links: 2, profiel_breedte: 50, gips_rechts: 2,
     isolatie: 'A', isolatie_lagen: 1, max_isolatie_dikte: 50,
-    schroeven: [
-      { laag: 1, lengte: 25, afstand_lengte: 750, afstand_breedte: 590 },
-      { laag: 2, lengte: 35, afstand_lengte: 250, afstand_breedte: 590 },
-    ],
+    schroeven: SCHROEF_2LAAGS,
   },
   MS100_1_75_1: {
     label: 'MS100 1.75.1', dikte: 100,
     gips_links: 1, profiel_breedte: 75, gips_rechts: 1,
     isolatie: false, isolatie_lagen: 0, max_isolatie_dikte: null,
-    schroeven: [
-      { laag: 1, lengte: 25, afstand_lengte: 250, afstand_breedte: 590 },
-    ],
+    schroeven: SCHROEF_1LAAG,
   },  
   MS100_1_75_1A: {
     label: 'MS100 1.75.1A', dikte: 100,
     gips_links: 1, profiel_breedte: 75, gips_rechts: 1,
     isolatie: 'A', isolatie_lagen: 1, max_isolatie_dikte: 75,
-    schroeven: [
-      { laag: 1, lengte: 25, afstand_lengte: 250, afstand_breedte: 590 },
-    ],
+    schroeven: SCHROEF_1LAAG,
   },
   MS125_2_75_2: {
     label: 'MS125 2.75.2', dikte: 125,
     gips_links: 2, profiel_breedte: 75, gips_rechts: 2,
     isolatie: false, isolatie_lagen: 0, max_isolatie_dikte: null,
-    schroeven: [
-      { laag: 1, lengte: 25, afstand_lengte: 750, afstand_breedte: 590 },
-      { laag: 2, lengte: 35, afstand_lengte: 250, afstand_breedte: 590 },
-    ],
+    schroeven: SCHROEF_2LAAGS,
   },
   MS125_2_75_2A: {
     label: 'MS125 2.75.2A', dikte: 125,
     gips_links: 2, profiel_breedte: 75, gips_rechts: 2,
     isolatie: 'A', isolatie_lagen: 1, max_isolatie_dikte: 75,
-    schroeven: [
-      { laag: 1, lengte: 25, afstand_lengte: 750, afstand_breedte: 590 },
-      { laag: 2, lengte: 35, afstand_lengte: 250, afstand_breedte: 590 },
-    ],
+    schroeven: SCHROEF_2LAAGS,
   },
   MS125_1_100_1A: {
     label: 'MS125 1.100.1A', dikte: 125,
     gips_links: 1, profiel_breedte: 100, gips_rechts: 1,
     isolatie: 'A', isolatie_lagen: 1, max_isolatie_dikte: 100,
-    schroeven: [
-      { laag: 1, lengte: 25, afstand_lengte: 250, afstand_breedte: 590 },
-    ],
+    schroeven: SCHROEF_1LAAG,
   },
 
   // ── Dubbele profielen ──────────────────────────────────────────────────────────
@@ -99,37 +88,25 @@ const WAND_TYPES = {
     label: 'MS205 2.75-75.2A', dikte: 205,
     gips_links: 2, profiel_breedte: 75, gips_rechts: 2,
     isolatie: 'A', isolatie_lagen: 1, max_isolatie_dikte: 75, dubbel_profiel: true,
-    schroeven: [
-      { laag: 1, lengte: 25, afstand_lengte: 750, afstand_breedte: 590 },
-      { laag: 2, lengte: 35, afstand_lengte: 250, afstand_breedte: 590 },
-    ],
+    schroeven: SCHROEF_2LAAGS,
   },
   MS205_2_75_75_2AA: {
     label: 'MS205 2.75-75.2AA', dikte: 205,
     gips_links: 2, profiel_breedte: 75, gips_rechts: 2,
     isolatie: 'AA', isolatie_lagen: 2, max_isolatie_dikte: 75, dubbel_profiel: true,
-    schroeven: [
-      { laag: 1, lengte: 25, afstand_lengte: 750, afstand_breedte: 590 },
-      { laag: 2, lengte: 35, afstand_lengte: 250, afstand_breedte: 590 },
-    ],
+    schroeven: SCHROEF_2LAAGS,
   },
   MS250_2_100_100_2A: {
     label: 'MS250 2.100-100.2A', dikte: 250,
     gips_links: 2, profiel_breedte: 100, gips_rechts: 2,
     isolatie: 'A', isolatie_lagen: 1, max_isolatie_dikte: 75, dubbel_profiel: true,
-    schroeven: [
-      { laag: 1, lengte: 25, afstand_lengte: 750, afstand_breedte: 590 },
-      { laag: 2, lengte: 35, afstand_lengte: 250, afstand_breedte: 590 },
-    ],
+    schroeven: SCHROEF_2LAAGS,
   },
   MS250_2_100_100_2AA: {
     label: 'MS250 2.100-100.2AA', dikte: 250,
     gips_links: 2, profiel_breedte: 100, gips_rechts: 2,
     isolatie: 'AA', isolatie_lagen: 2, max_isolatie_dikte: 75, dubbel_profiel: true,
-    schroeven: [
-      { laag: 1, lengte: 25, afstand_lengte: 750, afstand_breedte: 590 },
-      { laag: 2, lengte: 35, afstand_lengte: 250, afstand_breedte: 590 },
-    ],
+    schroeven: SCHROEF_2LAAGS,
   },
 
   // ── MSV (voorzetwand) types ───────────────────────────────────────────────
@@ -138,45 +115,31 @@ const WAND_TYPES = {
     label: 'MSV88 1.75', dikte: 88,
     gips_links: 1, profiel_breedte: 75, gips_rechts: 0,
     isolatie: false, isolatie_lagen: 0, max_isolatie_dikte: null,
-    schroeven: [
-      { laag: 1, lengte: 25, afstand_lengte: 250, afstand_breedte: 590 },
-    ],
+    schroeven: SCHROEF_1LAAG,
   },
   MSV100_2_75: {
     label: 'MSV100 2.75', dikte: 100,
     gips_links: 2, profiel_breedte: 75, gips_rechts: 0,
     isolatie: false, isolatie_lagen: 0, max_isolatie_dikte: null,
-    schroeven: [
-      { laag: 1, lengte: 25, afstand_lengte: 750, afstand_breedte: 590 },
-      { laag: 2, lengte: 35, afstand_lengte: 250, afstand_breedte: 590 },
-    ],
+    schroeven: SCHROEF_2LAAGS,
   },
   MSV100_2_75A: {
     label: 'MSV100 2.75A', dikte: 100,
     gips_links: 2, profiel_breedte: 75, gips_rechts: 0,
     isolatie: 'A', isolatie_lagen: 1, max_isolatie_dikte: 75,
-    schroeven: [
-      { laag: 1, lengte: 25, afstand_lengte: 750, afstand_breedte: 590 },
-      { laag: 2, lengte: 35, afstand_lengte: 250, afstand_breedte: 590 },
-    ],
+    schroeven: SCHROEF_2LAAGS,
   },
   MSV75_2_50: {
     label: 'MSV75 2.50', dikte: 75,
     gips_links: 2, profiel_breedte: 50, gips_rechts: 0,
     isolatie: false, isolatie_lagen: 0, max_isolatie_dikte: null,
-    schroeven: [
-      { laag: 1, lengte: 25, afstand_lengte: 750, afstand_breedte: 590 },
-      { laag: 2, lengte: 35, afstand_lengte: 250, afstand_breedte: 590 },
-    ],
+    schroeven: SCHROEF_2LAAGS,
   },
   MSV75_2_50A: {
     label: 'MSV75 2.50A', dikte: 75,
     gips_links: 2, profiel_breedte: 50, gips_rechts: 0,
     isolatie: 'A', isolatie_lagen: 1, max_isolatie_dikte: 50,
-    schroeven: [
-      { laag: 1, lengte: 25, afstand_lengte: 750, afstand_breedte: 590 },
-      { laag: 2, lengte: 35, afstand_lengte: 250, afstand_breedte: 590 },
-    ],
+    schroeven: SCHROEF_2LAAGS,
   },
 };
 
@@ -217,7 +180,6 @@ const DOM = {
   gipsTypeLinks2:  () => document.getElementById('gips-type-links-2'),
   gipsTypeRechts1: () => document.getElementById('gips-type-rechts-1'),
   gipsTypeRechts2: () => document.getElementById('gips-type-rechts-2'),
-  gipsSelectGroep: () => document.getElementById('gips-select-groep'),
   hohAfstand:      () => document.getElementById('hoh-afstand'),
   isolatieDikte:   () => document.getElementById('isolatie-dikte'),
   gipsBreedte:     () => document.getElementById('gips-breedte'),
@@ -257,16 +219,85 @@ function debounce(fn) {
 }
 
 // ─── HELPERS ────────────────────────────────────────────────────────────────
+/** @param {number} n @returns {number} */
 function ceilN(n) { return Math.ceil(n); }
+/** @param {number} n @returns {number} Afgerond op 2 decimalen */
 function round2(n) { return Math.round(n * 100) / 100; }
+/** @param {number} n @returns {number|string} */
 function fmtNum(n) { return Number.isInteger(n) ? n : round2(n); }
 
+/**
+ * Toont een statusmelding in de invoerkaart.
+ * @param {string} msg   - Weergegeven tekst
+ * @param {'ready'|'calculating'|'error'|''} [type] - CSS modifier
+ */
 function setStatus(msg, type = '') {
   const el = DOM.calcStatus();
   el.textContent = msg;
   el.className = 'calc-status ' + type;
 }
 
+// ─── INLINE VELDVALIDATIE ─────────────────────────────────────────────────────
+/**
+ * Markeert een inputveld als ongeldig en toont een foutmelding eronder.
+ * @param {HTMLInputElement|HTMLSelectElement} el
+ * @param {string} msg
+ */
+function toonFout(el, msg) {
+  el.classList.add('invalid');
+  const foutId = (el.id || 'veld') + '-fout';
+  let fout = el.parentElement.querySelector('.field-error-msg');
+  if (!fout) {
+    fout = document.createElement('span');
+    fout.className = 'field-error-msg';
+    fout.setAttribute('role', 'alert');
+    fout.id = foutId;
+    el.after(fout);
+  }
+  fout.textContent = msg;
+  el.setAttribute('aria-describedby', foutId);
+  el.setAttribute('aria-invalid', 'true');
+}
+
+/** @param {HTMLInputElement|HTMLSelectElement} el */
+function verbergFout(el) {
+  el.classList.remove('invalid');
+  el.removeAttribute('aria-describedby');
+  el.removeAttribute('aria-invalid');
+  const fout = el.parentElement.querySelector('.field-error-msg');
+  if (fout) fout.remove();
+}
+
+/**
+ * Toont of verbergt een inline foutmelding afhankelijk van de conditie.
+ * @param {HTMLInputElement|HTMLSelectElement} el
+ * @param {boolean} conditie - `true` = geldig (geen fout)
+ * @param {string} msg
+ */
+function valideerVeld(el, conditie, msg) {
+  if (!conditie) toonFout(el, msg);
+  else verbergFout(el);
+}
+
+/**
+ * Leest alle invoervelden uit en geeft een genormaliseerd inputobject terug.
+ * @returns {{
+ *   omschrijving: string,
+ *   wand_type: string,
+ *   wand_lengte: number,
+ *   wand_hoogte: number,
+ *   gips_type_links_1: string,
+ *   gips_type_links_2: string|null,
+ *   gips_type_rechts_1: string,
+ *   gips_type_rechts_2: string|null,
+ *   hoh_afstand: number,
+ *   isolatie_dikte: number,
+ *   gips_breedte: number,
+ *   gips_lengte: number,
+ *   profiel_u_lengte: number,
+ *   profiel_c_lengte: number
+ * }}
+ */
 function getInputs() {
   return {
     omschrijving: DOM.omschrijving().value.trim() || 'Wand',
@@ -277,7 +308,7 @@ function getInputs() {
     gips_type_links_2:  DOM.gipsTypeLinks2() ? DOM.gipsTypeLinks2().value : null,
     gips_type_rechts_1: DOM.gipsTypeRechts1().value,
     gips_type_rechts_2: DOM.gipsTypeRechts2() ? DOM.gipsTypeRechts2().value : null,
-    hoh_afstand:  parseFloat(DOM.hohAfstand().value) || 0.6,
+    hoh_afstand:  parseFloat(DOM.hohAfstand().value) || HOH_AFSTAND_DEFAULT,
     isolatie_dikte: parseInt(DOM.isolatieDikte().value),
     gips_breedte:   parseInt(DOM.gipsBreedte().value),
     gips_lengte:    parseInt(DOM.gipsLengte().value),
@@ -286,6 +317,11 @@ function getInputs() {
   };
 }
 
+/**
+ * Controleert of de invoer voldoende is om een berekening te starten.
+ * @param {ReturnType<typeof getInputs>} inp
+ * @returns {boolean}
+ */
 function geldigeInputs(inp) {
   return inp.wand_type &&
          inp.wand_lengte > 0 && !isNaN(inp.wand_lengte) &&
@@ -293,6 +329,26 @@ function geldigeInputs(inp) {
 }
 
 // ─── BEREKEN (lokaal — geen backend nodig voor deze formules) ───────────────
+/**
+ * Berekent alle materialenhoeveelheden voor één wand.
+ * @param {ReturnType<typeof getInputs>} inp
+ * @returns {{
+ *   cfg: object,
+ *   wand_opp: number,
+ *   profiel_factor: number,
+ *   profiel_u_aantal: number,
+ *   profiel_c_aantal: number,
+ *   gips_opp: number,
+ *   platen_per_laag: number,
+ *   gips_lagen: Array<{zijde: string, laag_nr: number, gips_type: string, breedte: number, lengte: number, opp: number, aantal: number}>,
+ *   gips_aantal: number,
+ *   iso_opp: number,
+ *   iso_aantal: number,
+ *   heeft_isolatie: boolean,
+ *   isolatie_lagen: number,
+ *   schroeven_per_laag: Array<{laag: number, lengte: number, afstand_lengte: number, afstand_breedte: number, totaal: number}>
+ * }|null} Null als wand_type onbekend is
+ */
 function berekenLokaal(inp) {
   const cfg = WAND_TYPES[inp.wand_type];
   if (!cfg) return null;
@@ -477,6 +533,10 @@ function onTypeChange() {
   triggerBerekening();
 }
 
+/**
+ * Schakelt isolatiedikte-opties uit die de profielbreedte overschrijden.
+ * @param {{ max_isolatie_dikte: number|null }} cfg
+ */
 function filterIsolatieDikte(cfg) {
   const sel = DOM.isolatieDikte();
   const max = cfg.max_isolatie_dikte;
@@ -658,7 +718,7 @@ function renderAlgemeen() {
       <td class="num">${fmtNum(w.wand_lengte)}</td>
       <td class="num">${fmtNum(w.wand_hoogte)}</td>
       <td class="num">${fmtNum(w.wand_opp)}</td>
-      <td><button class="btn-delete" onclick="verwijder(${w.id})" title="Verwijder">✕</button></td>
+      <td><button class="btn-delete" data-action="verwijder" data-id="${w.id}" title="Verwijder" aria-label="Wand '${esc(w.omschrijving)}' verwijderen">✕</button></td>
     </tr>`).join('');
 }
 
@@ -957,7 +1017,7 @@ function renderTotalen() {
           <td>${esc(e.omschrijving)}</td>
           <td class="num">${e.aantal}</td>
           <td>${esc(e.eenheid)}</td>
-          <td><button class="btn-delete" onclick="verwijderExtra(${e.id})" title="Verwijder">✕</button></td>
+          <td><button class="btn-delete" data-action="verwijder-extra" data-id="${e.id}" title="Verwijder" aria-label="'${esc(e.omschrijving)}' verwijderen">✕</button></td>
         </tr>`).join('');
     });
   }
@@ -1019,6 +1079,13 @@ function verwijderExtra(id) {
 }
 
 // ─── UTILITY ─────────────────────────────────────────────────────────────────
+/**
+ * Groepeert een array op een sleutel geproduceerd door keyFn.
+ * @template T
+ * @param {T[]} arr
+ * @param {(item: T) => string} keyFn
+ * @returns {Record<string, T[]>}
+ */
 function groepeer(arr, keyFn) {
   return arr.reduce((acc, item) => {
     const k = keyFn(item);
@@ -1028,6 +1095,11 @@ function groepeer(arr, keyFn) {
   }, {});
 }
 
+/**
+ * Escapet een string voor veilig gebruik in innerHTML.
+ * @param {string} str
+ * @returns {string}
+ */
 function esc(str) {
   return String(str)
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
@@ -1038,6 +1110,9 @@ function esc(str) {
 function initEvents() {
   // Type dropdown → direct
   DOM.wandType().addEventListener('change', onTypeChange);
+  DOM.wandType().addEventListener('blur', () => {
+    valideerVeld(DOM.wandType(), !!DOM.wandType().value, 'Kies een wandtype');
+  });
 
   // Numerieke inputs → debounce
   [DOM.wandLengte, DOM.wandHoogte, DOM.hohAfstand, DOM.gipsBreedte,
@@ -1047,9 +1122,24 @@ function initEvents() {
   ].forEach(getFn => {
     getFn().addEventListener('input', () => {
       if (getFn === DOM.wandHoogte) filterCProfielen();
+      // Fout verbergen zodra waarde geldig wordt tijdens typen
+      if (getFn === DOM.wandLengte || getFn === DOM.wandHoogte) {
+        const v = parseFloat(getFn().value);
+        if (v > 0) verbergFout(getFn());
+      }
       triggerBerekening();
     });
     getFn().addEventListener('change', triggerBerekening);
+  });
+
+  // Blur-validatie voor verplichte numerieke velden
+  DOM.wandLengte().addEventListener('blur', () => {
+    const v = parseFloat(DOM.wandLengte().value);
+    valideerVeld(DOM.wandLengte(), v > 0, 'Voer een geldige wandlengte in (bijv. 5.40)');
+  });
+  DOM.wandHoogte().addEventListener('blur', () => {
+    const v = parseFloat(DOM.wandHoogte().value);
+    valideerVeld(DOM.wandHoogte(), v > 0, 'Voer een geldige wandhoogte in (bijv. 2.70)');
   });
 
   DOM.omschrijving().addEventListener('input', triggerBerekening);
@@ -1062,6 +1152,16 @@ function initEvents() {
   [DOM.extraOmschrijving, DOM.extraAantal, DOM.extraEenheid,
    DOM.vuAantal, DOM.vuLengte].forEach(getFn => {
     getFn().addEventListener('keydown', e => { if (e.key === 'Enter') voegHandmatigToe(); });
+  });
+
+  // Event delegation voor delete-knoppen in tabellen
+  DOM.tbodyAlgemeen().addEventListener('click', e => {
+    const btn = e.target.closest('[data-action="verwijder"]');
+    if (btn) verwijder(Number(btn.dataset.id));
+  });
+  document.getElementById('tbody-totalen').addEventListener('click', e => {
+    const btn = e.target.closest('[data-action="verwijder-extra"]');
+    if (btn) verwijderExtra(Number(btn.dataset.id));
   });
 }
 

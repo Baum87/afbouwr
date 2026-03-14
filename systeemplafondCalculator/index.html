@@ -44,8 +44,8 @@
           <div class="form-group form-group-span">
             <label>Systeemtype</label>
             <div class="btn-group-compact">
-              <button class="btn" data-system="600x600">600×600 systeem</button>
-              <button class="btn" data-system="600x1200">600×1200 systeem</button>
+              <button class="btn" data-system="600x600" aria-pressed="false">600×600 systeem</button>
+              <button class="btn" data-system="600x1200" aria-pressed="false">600×1200 systeem</button>
             </div>
           </div>
 
@@ -53,10 +53,10 @@
           <div class="form-group form-group-span">
             <label>Kleur profielen &amp; hoeklijn</label>
             <div class="btn-group-compact">
-              <button class="btn active" data-kleur="wit">
+              <button class="btn active" data-kleur="wit" aria-pressed="true">
                 <span class="kleur-swatch kleur-swatch-wit"></span>Wit
               </button>
-              <button class="btn" data-kleur="zwart">
+              <button class="btn" data-kleur="zwart" aria-pressed="false">
                 <span class="kleur-swatch kleur-swatch-zwart"></span>Zwart
               </button>
             </div>
@@ -163,7 +163,7 @@
 
         <div class="card-actions">
           <button class="btn btn-primary" id="btn-toevoegen" disabled>+ Toevoegen aan lijst</button>
-          <span class="calc-status" id="calc-status"></span>
+          <span class="calc-status" id="calc-status" role="status" aria-live="polite" aria-atomic="true"></span>
         </div>
       </section>
 
