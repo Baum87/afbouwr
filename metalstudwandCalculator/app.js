@@ -143,20 +143,13 @@ const WAND_TYPES = {
   },
 };
 
-const GIPS_LABELS = {
-  standaard_ak:   'Standaard AK',
-  standaard_4ak:  'Standaard 4-AK (2400×1200)',
-  hydro:          'Hydro (groen)',
-  ladura:         'Ladura Standaard',
-  novlam:         'Novlam (roze)',
-  osb:            'OSB',
-};
-
-// Vaste afmetingen per gipstype (overschrijft gebruikersinput indien aanwezig)
-const GIPS_VASTE_MATEN = {
-  standaard_4ak: { breedte: 1200, lengte: 2400 },
-  osb:           { breedte: 1250, lengte: 2500 }, // standaard OSB plaat
-};
+// Afgeleid uit PRODUCTEN (products.js) — niet handmatig aanpassen
+const GIPS_LABELS = Object.fromEntries(
+  PRODUCTEN.gipstypen.map(g => [g.waarde, g.label])
+);
+const GIPS_VASTE_MATEN = Object.fromEntries(
+  PRODUCTEN.gipstypen.filter(g => g.vasteMaten).map(g => [g.waarde, g.vasteMaten])
+);
 
 // ─── STATE ─────────────────────────────────────────────────────────────────
 let state = {
@@ -1107,6 +1100,16 @@ function esc(str) {
     .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 
+// ─── PRODUCT SELECTS ─────────────────────────────────────────────────────────
+function vulGipsTypeSelects() {
+  const opties = PRODUCTEN.gipstypen.map(g => {
+    const maat = g.vasteMaten ? ` (${g.vasteMaten.lengte}×${g.vasteMaten.breedte})` : '';
+    return `<option value="${g.waarde}">${g.label}${maat}</option>`;
+  }).join('');
+  [DOM.gipsTypeLinks1, DOM.gipsTypeLinks2, DOM.gipsTypeRechts1, DOM.gipsTypeRechts2]
+    .forEach(getFn => { getFn().innerHTML = opties; });
+}
+
 // ─── EVENTS ──────────────────────────────────────────────────────────────────
 function initEvents() {
   // Type dropdown → direct
@@ -1169,6 +1172,7 @@ function initEvents() {
 
 // ─── INIT ───────────────────────────────────────────────────────────────────
 function init() {
+  vulGipsTypeSelects();
   laadOpgeslagen();
   renderAlles();
   initEvents();

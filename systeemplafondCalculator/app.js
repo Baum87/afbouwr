@@ -531,8 +531,32 @@ function verwijderExtra(id) {
 
 // ── Init ───────────────────────────────────────────────────────────────────
 
+function vulPlaatMerkSelect() {
+  const sel = DOM.plaatMerk();
+  sel.innerHTML = '<option value="">— niet opgegeven —</option>';
+  PRODUCTEN.plafondplaten.forEach(groep => {
+    const optgroup = document.createElement('optgroup');
+    optgroup.label = groep.merk;
+    groep.typen.forEach(type => {
+      const opt = document.createElement('option');
+      opt.value = type.waarde;
+      opt.textContent = type.label;
+      optgroup.appendChild(opt);
+    });
+    sel.appendChild(optgroup);
+  });
+  const overig = document.createElement('optgroup');
+  overig.label = 'Overig';
+  const anders = document.createElement('option');
+  anders.value = 'anders';
+  anders.textContent = 'Anders (zelf invullen)';
+  overig.appendChild(anders);
+  sel.appendChild(overig);
+}
+
 window.addEventListener('load', () => {
 
+  vulPlaatMerkSelect();
   laadOp();
   renderTabel();
 
