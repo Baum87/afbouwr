@@ -692,6 +692,7 @@ function laadOpgeslagen() {
 
 // ─── RENDER ─────────────────────────────────────────────────────────────────
 function renderAlles() {
+  document.getElementById('results-section').style.display = state.wanden.length > 0 ? '' : 'none';
   renderAlgemeen();
   renderUProfielen();
   renderCProfielen();
@@ -699,7 +700,7 @@ function renderAlles() {
   renderIsolatie();
   renderSchroeven();
   renderTotalen();
-  DOM.countWanden().textContent = state.wanden.length + (state.wanden.length === 1 ? ' wand' : ' wanden');
+  DOM.countWanden().textContent = `${state.wanden.length} ${state.wanden.length === 1 ? 'wand' : 'wanden'}`;
 }
 
 function emptyRow(colspan) {
@@ -1147,6 +1148,7 @@ function initEvents() {
   DOM.projectNaam().addEventListener('input', e => slaProjectOp(e.target.value));
   DOM.btnAllesReset().addEventListener('click', allesVerwijderen);
   DOM.btnHandmatigAdd().addEventListener('click', voegHandmatigToe);
+  document.getElementById('btn-afdrukken').addEventListener('click', () => window.print());
 
   // Enter in handmatig invoer velden → toevoegen
   [DOM.extraOmschrijving, DOM.extraAantal, DOM.extraEenheid,

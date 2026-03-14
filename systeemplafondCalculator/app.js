@@ -591,6 +591,12 @@ window.addEventListener('load', () => {
         const b = parseFloat(DOM.breedteInput().value) || 0;
         DOM.berekendeVal().textContent =
           (l > 0 && b > 0) ? (l * b).toFixed(2) + ' m\u00b2' : '\u2014';
+        // Auto-omtrek: 2×(L+B)
+        if (l > 0 && b > 0) {
+          const omtrek = 2 * (l + b);
+          DOM.omtrekInput().value = omtrek % 1 === 0 ? String(omtrek) : omtrek.toFixed(2);
+          verbergFout(DOM.omtrekInput());
+        }
       }
       // Fout verbergen zodra waarde geldig wordt tijdens typen
       if (parseFloat(e.target.value) > 0) verbergFout(e.target);
@@ -648,6 +654,9 @@ window.addEventListener('load', () => {
 
   // Projectnaam opslaan
   DOM.projectNaam().addEventListener('input', slaOp);
+
+  // Afdrukken
+  document.getElementById('btn-afdrukken').addEventListener('click', () => window.print());
 
   // Initiële statusmelding
   DOM.calcStatus().textContent = 'Kies een systeemtype om te beginnen';

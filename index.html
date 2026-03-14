@@ -6,14 +6,6 @@
   <title>Afbouwr — Materiaalcalculatoren voor de afbouw</title>
   <meta name="description" content="Gratis materiaalcalculatoren voor de afbouwsector. Bereken snel en correct hoeveel materiaal je nodig hebt voor systeemplafond, metalstud wand en meer." />
   <link rel="stylesheet" href="style.css?v=3.3" />
-  <style>
-    /* ── Hub-specifieke responsive overrides ── */
-    @media (max-width: 600px) {
-      .tools-grid       { grid-template-columns: 1fr; }
-      .bug-form-row     { grid-template-columns: 1fr; }
-      .hub-footer-inner { flex-direction: column; align-items: flex-start; }
-    }
-  </style>
 </head>
 
 <body class="has-nav">
@@ -184,40 +176,38 @@
   <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
   <script src="components.js?v=3.3"></script>
   <script>
+    'use strict';
     // ── Bug formulier ──────────────────────────────────────────────────────
-    document.getElementById('btn-bug-verzenden').addEventListener('click', function() {
-      var calculator   = document.getElementById('bug-calculator').value;
-      var naam         = document.getElementById('bug-naam').value.trim();
-      var omschrijving = document.getElementById('bug-omschrijving').value.trim();
+    const elCalculator   = document.getElementById('bug-calculator');
+    const elNaam         = document.getElementById('bug-naam');
+    const elOmschrijving = document.getElementById('bug-omschrijving');
+    const elBugStatus    = document.getElementById('bug-status');
 
-      if (!omschrijving) {
-        document.getElementById('bug-omschrijving').focus();
-        return;
-      }
+    document.getElementById('btn-bug-verzenden').addEventListener('click', () => {
+      const calculator   = elCalculator.value;
+      const naam         = elNaam.value.trim();
+      const omschrijving = elOmschrijving.value.trim();
 
-      var subject = 'Bug melding' + (calculator ? ' — ' + calculator : '');
-      var body    = '';
-      if (naam)       body += 'Van: ' + naam + '\n';
-      if (calculator) body += 'Calculator: ' + calculator + '\n';
-      body += '\nOmschrijving:\n' + omschrijving;
+      if (!omschrijving) { elOmschrijving.focus(); return; }
 
-      var mailto = 'mailto:info@afbouwr.nl'
-        + '?subject=' + encodeURIComponent(subject)
-        + '&body='    + encodeURIComponent(body);
+      const subject = calculator ? `Bug melding — ${calculator}` : 'Bug melding';
+      let body = '';
+      if (naam)       body += `Van: ${naam}\n`;
+      if (calculator) body += `Calculator: ${calculator}\n`;
+      body += `\nOmschrijving:\n${omschrijving}`;
 
-      window.location.href = mailto;
+      window.location.href = `mailto:info@afbouwr.nl?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
-      document.getElementById('bug-calculator').value   = '';
-      document.getElementById('bug-naam').value         = '';
-      document.getElementById('bug-omschrijving').value = '';
+      elCalculator.value   = '';
+      elNaam.value         = '';
+      elOmschrijving.value = '';
 
-      var status = document.getElementById('bug-status');
-      status.classList.add('visible');
-      setTimeout(function() { status.classList.remove('visible'); }, 4000);
+      elBugStatus.classList.add('visible');
+      setTimeout(() => elBugStatus.classList.remove('visible'), 4000);
     });
 
     // Enter in textarea → niet versturen (behoud multiline)
-    document.getElementById('bug-omschrijving').addEventListener('keydown', function(e) {
+    elOmschrijving.addEventListener('keydown', e => {
       if (e.key === 'Enter' && !e.shiftKey) e.stopPropagation();
     });
   </script>

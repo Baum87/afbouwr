@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Metalstud Wand Rekenmachine — Afbouwr</title>
+  <meta name="description" content="Bereken U- en C-profielen, gipskarton, isolatie en schroeven voor metalstud wanden. Ondersteunt MS, MSV en dubbelwand systemen." />
   <link rel="stylesheet" href="../style.css?v=3.3" />
 </head>
 <body class="has-nav">
@@ -27,7 +28,7 @@
             <label for="project-naam">Projectnaam</label>
             <input type="text" id="project-naam" placeholder="bijv. Verbouwing Kantoor A" autocomplete="off" />
           </div>
-          <button class="btn btn-reset" id="btn-alles-reset">↺ Alles verwijderen</button>
+          <button class="btn btn-reset" id="btn-alles-reset">↺ Alles wissen</button>
         </div>
       </div>
     </header>
@@ -232,7 +233,7 @@
       </section>
 
       <!-- ── RESULTATEN ── -->
-      <section class="results-section" id="results-section">
+      <section class="results-section" id="results-section" style="display:none;">
 
         <!-- Wandoverzicht -->
         <div class="table-card">
@@ -280,7 +281,7 @@
             </table>
           </div>
           <div class="table-actions">
-            <button class="btn btn-outline btn-sm" onclick="window.print()">⎙ Afdrukken</button>
+            <button class="btn btn-outline btn-sm" id="btn-afdrukken">⎙ Afdrukken</button>
           </div>
         </div>
 
