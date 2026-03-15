@@ -769,6 +769,9 @@ table select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0
 .handmatig-hint  { font-size: 12px; color: var(--ink-3); }
 .handmatig-hint em { font-style: italic; }
 
+/* Mobiele lijstweergave voor handmatig toegevoegde materialen — desktop verborgen */
+.handmatig-lijst-mobiel { display: none; }
+
 .invoer-scheiding { height: 1px; background: var(--border); margin: 12px 0; }
 
 /* ==========================================================================
@@ -1282,6 +1285,25 @@ hr { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
   .handmatig-rij          { flex-direction: column; align-items: stretch; }
   .handmatig-label        { width: auto; }
   .handmatig-rij .handmatig-select { flex: unset; width: 100%; }
+
+  /* Handmatig toegevoegde materialen: lijstweergave */
+  .handmatig-lijst-mobiel { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+  .handmatig-item {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--r-sm); padding: 10px 12px;
+  }
+  .handmatig-item-naam   { flex: 1; font-size: 14px; }
+  .handmatig-item-detail { font-family: var(--mono); font-size: 13px; color: var(--ink-2); white-space: nowrap; }
+  .handmatig-item-delete {
+    min-width: 36px; height: 36px; background: none;
+    border: 1.5px solid var(--border); border-radius: var(--r-sm);
+    color: var(--ink-2); font-size: 14px; cursor: pointer;
+  }
+  .handmatig-item-delete:active { background: var(--surface-2); }
+  /* Verberg delete-knoppen in totaaloverzicht op mobiel */
+  tr.extra-rij .btn-delete,
+  tr.extra-rij .btn-delete-room { display: none; }
 }
 
 /* ==========================================================================

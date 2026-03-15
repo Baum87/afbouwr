@@ -394,6 +394,19 @@ function renderTotaalTabel() {
   }
 
   totaalEl.innerHTML = html || '<tr class="empty-row"><td colspan="6">—</td></tr>';
+  renderHandmatigLijst();
+}
+
+function renderHandmatigLijst() {
+  const lijstEl = document.getElementById('handmatig-lijst');
+  if (!lijstEl) return;
+  lijstEl.innerHTML = extraMaterialen.map(e =>
+    `<div class="handmatig-item">
+      <span class="handmatig-item-naam">${esc(e.omschrijving)}</span>
+      <span class="handmatig-item-detail">${e.aantal}\u00a0${esc(e.eenheid)}</span>
+      <button class="handmatig-item-delete" data-action="verwijder-extra" data-id="${e.id}" aria-label="${esc(e.omschrijving)} verwijderen">✕</button>
+    </div>`
+  ).join('');
 }
 
 // ── Toevoegen / verwijderen ────────────────────────────────────────────────
@@ -651,8 +664,8 @@ window.addEventListener('load', () => {
     if (btn) verwijderRuimte(Number(btn.dataset.id));
   });
 
-  // Event delegation voor delete-knop handmatig materiaal
-  DOM.tbodyTotalen().addEventListener('click', e => {
+  // Event delegation voor delete-knop handmatig materiaal (ook mobiele lijst)
+  document.addEventListener('click', e => {
     const btn = e.target.closest('[data-action="verwijder-extra"]');
     if (btn) verwijderExtra(Number(btn.dataset.id));
   });
