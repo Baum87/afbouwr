@@ -23,26 +23,40 @@ const PRODUCTEN = {
   //
   plafondplaten: [
     {
-      merk: 'Armstrong',
+      merk: 'Knauf',
       typen: [
-        { waarde: 'Armstrong Dune',      label: 'Dune' },
-        { waarde: 'Armstrong Cortega',   label: 'Cortega' },
-        { waarde: 'Armstrong Bioguard',  label: 'Bioguard' },
+        { waarde: 'Knauf Sahara',    label: 'Sahara' },
+        { waarde: 'Knauf Feria',     label: 'Feria' },
+        { waarde: 'Knauf Perla OP',  label: 'Perla OP 0.95' },
+        { waarde: 'Knauf Tatra',     label: 'Tatra' },
       ],
     },
     {
       merk: 'Rockfon',
       typen: [
-        { waarde: 'Rockfon Sonar',       label: 'Sonar' },
-        { waarde: 'Rockfon Color-all',   label: 'Color-all' },
-        { waarde: 'Rockfon Tropic',      label: 'Tropic' },
+        { waarde: 'Rockfon Krios',     label: 'Krios' },
+        { waarde: 'Rockfon Lithos',    label: 'Lithos' },
+        { waarde: 'Rockfon Pallas',    label: 'Pallas' },
+        { waarde: 'Rockfon Black',     label: 'Black' },
+        { waarde: 'Rockfon Color-all', label: 'Color-all' },
       ],
     },
     {
-      merk: 'Knauf',
+      merk: 'OWA',
       typen: [
-        { waarde: 'Knauf Cleaneo',       label: 'Cleaneo' },
-        { waarde: 'Knauf Soundwave',     label: 'Soundwave' },
+        { waarde: 'OWA Harmony',    label: 'Harmony' },
+        { waarde: 'OWA Sandila',    label: 'Sandila' },
+        { waarde: 'OWA Sternbild',  label: 'Sternbild' },
+        { waarde: 'OWA Sinfonia',   label: 'Sinfonia' },
+        { waarde: 'OWA Brillianto', label: 'Brillianto' },
+        { waarde: 'OWA Cosmos',     label: 'Cosmos' },
+      ],
+    },
+    {
+      merk: 'Gipsvinyl',
+      typen: [
+        { waarde: 'Gipsvinyl wit',   label: 'Gipsvinyl wit' },
+        { waarde: 'Gipsvinyl zwart', label: 'Gipsvinyl zwart' },
       ],
     },
   ],
