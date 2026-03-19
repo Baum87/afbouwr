@@ -734,7 +734,7 @@ table select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0
 
 .handmatig-label {
   font-size: 12px; font-weight: 600; color: var(--ink-2);
-  width: 52px; flex-shrink: 0;
+  width: 72px; flex-shrink: 0;
   text-transform: uppercase; letter-spacing: .4px;
 }
 
