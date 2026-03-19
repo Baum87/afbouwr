@@ -1325,10 +1325,14 @@ hr { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
   .table-actions,
   .btn-delete,
   .btn-delete-room,
-  .handmatig-invoer     { display: none !important; }
+  .handmatig-invoer,
+  .input-card,
+  .sectie-scheiding,
+  .results-section .table-card:not(.totalen-card) { display: none !important; }
   .app-wrapper          { max-width: 100%; padding: 0; }
-  .card, .table-card    { box-shadow: none; border: 1px solid var(--border); break-inside: avoid; margin-bottom: 14px; }
+  .table-card           { box-shadow: none; border: 1px solid var(--border); break-inside: avoid; margin-bottom: 14px; }
   .app-header           { border-bottom: 2px solid #000; padding: 10px 0; margin-bottom: 14px; }
   .project-invoer input { border: none; font-size: 18px; font-weight: 700; width: auto; padding: 0; pointer-events: none; }
   .project-invoer label { display: none; }
+  .btn                  { display: none !important; }
 }

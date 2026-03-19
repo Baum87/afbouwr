@@ -60,6 +60,15 @@ const MATERIAAL_VOLGORDE = [
   'Kantlat'
 ];
 
+const MATERIAAL_GROEP = {
+  'Plafondplaten':      'Plafondplaten',
+  'Hoofdprofielen':     'Profielen',
+  'Tussenprofielen 1200': 'Profielen',
+  'Tussenprofielen 600':  'Profielen',
+  'Hoeklijn':           'Profielen',
+  'Kantlat':            'Kantlatten',
+};
+
 // ── State ──────────────────────────────────────────────────────────────────
 
 let gekozenSysteem  = null;   // '600x600' | '600x1200'
@@ -353,14 +362,15 @@ function renderTotaalTabel() {
   });
 
   let html = '';
-  let huidigMateriaal = null;
+  let huidigGroep = null;
 
   for (const key of keys) {
     const item = map[key];
+    const groep = MATERIAAL_GROEP[item.materiaal] || item.materiaal;
 
-    if (item.materiaal !== huidigMateriaal) {
-      huidigMateriaal = item.materiaal;
-      html += `<tr class="totaal-categorie-header"><td colspan="6">${esc(item.materiaal)}</td></tr>`;
+    if (groep !== huidigGroep) {
+      huidigGroep = groep;
+      html += `<tr class="totaal-categorie-header"><td colspan="6">${esc(groep)}</td></tr>`;
     }
 
     const kleurCel = item.kleur
