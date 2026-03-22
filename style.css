@@ -468,6 +468,20 @@ body.has-nav { padding-top: 56px; }
   flex-shrink: 0;
 }
 
+/* Verticale ruimte tussen blokken binnen een invoerkaart */
+.input-card .form-grid + .form-grid,
+.input-card .form-grid + .invoer-rij,
+.input-card .invoer-rij + .form-grid,
+.input-card .sectie-scheiding + .form-grid,
+.input-card .sectie-scheiding + .invoer-rij {
+  margin-top: 20px;
+}
+
+/* Spacing tussen form-groups in de account-kaart */
+.card .form-group + .form-group {
+  margin-top: 16px;
+}
+
 /* Invoer-rij: omschrijving + methode + maten op één rij */
 .invoer-rij {
   display: grid;

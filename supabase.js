@@ -10,8 +10,8 @@
 
 'use strict';
 
-const SUPABASE_URL     = 'https://jouw-project.supabase.co';   // ← aanpassen
-const SUPABASE_ANON_KEY = 'jouw-anon-key-hier';                 // ← aanpassen
+const SUPABASE_URL      = 'https://ajqnkcvfbgogvnknoqdf.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFqcW5rY3ZmYmdvZ3Zua25vcWRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxODE0NzIsImV4cCI6MjA4OTc1NzQ3Mn0.QyBfADlKQm7vhPHN7XKkeSwTBO_WQbnUHKqCexNOEy4';
 
 // ── Initialiseer Supabase client ───────────────────────────────────────────
 // Vereist: Supabase JS SDK geladen via <script> tag (zie components.js of HTML)
