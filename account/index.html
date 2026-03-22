@@ -5,152 +5,322 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Account — Afbouwr</title>
   <meta name="robots" content="noindex" />
-  <link rel="stylesheet" href="../style.css?v=3.3" />
+  <link rel="stylesheet" href="../style.css?v=3.5" />
 </head>
 <body class="has-nav">
 
   <site-nav back="true"></site-nav>
 
-  <div class="hub-wrapper" style="max-width: 480px;">
+  <div class="hub-wrapper account-wrapper">
 
-    <section class="hub-section">
+    <!-- ── STATUS ── -->
+    <div id="account-status" class="account-status" style="display:none;" role="alert"></div>
+
+    <!-- ══════════════════════════════════════════════
+         VIEW A: NIET INGELOGD
+         Twee tabbladen: Inloggen / Registreren
+    ══════════════════════════════════════════════ -->
+    <div id="view-auth">
+
+      <!-- Tabbladen -->
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tab-inloggen">Inloggen</button>
+        <button class="auth-tab" id="tab-registreren">Nieuw account</button>
+      </div>
+
+      <!-- ── Inloggen ── -->
+      <div id="form-inloggen" class="card input-card auth-card">
+        <div class="form-group">
+          <label for="login-email">E-mailadres</label>
+          <input type="email" id="login-email" placeholder="jouw@email.nl" autocomplete="email" />
+        </div>
+        <div class="form-group">
+          <label for="login-wachtwoord">Wachtwoord</label>
+          <input type="password" id="login-wachtwoord" placeholder="Jouw wachtwoord" autocomplete="current-password" />
+        </div>
+        <div class="card-actions">
+          <button class="btn btn-primary" id="btn-inloggen">Inloggen</button>
+        </div>
+      </div>
+
+      <!-- ── Registreren ── -->
+      <div id="form-registreren" class="card input-card auth-card" style="display:none;">
+        <div class="form-grid form-grid-2col">
+          <div class="form-group">
+            <label for="reg-voornaam">Voornaam</label>
+            <input type="text" id="reg-voornaam" placeholder="bijv. Jan" autocomplete="given-name" />
+          </div>
+          <div class="form-group">
+            <label for="reg-achternaam">Achternaam</label>
+            <input type="text" id="reg-achternaam" placeholder="bijv. de Vries" autocomplete="family-name" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="reg-email">E-mailadres</label>
+          <input type="email" id="reg-email" placeholder="jouw@email.nl" autocomplete="email" />
+        </div>
+        <div class="form-group">
+          <label for="reg-wachtwoord">Wachtwoord</label>
+          <input type="password" id="reg-wachtwoord" placeholder="Minimaal 6 tekens" autocomplete="new-password" />
+        </div>
+        <div class="form-group">
+          <label for="reg-bedrijf">
+            Bedrijfsnaam <span class="optioneel-tag">optioneel</span>
+          </label>
+          <input type="text" id="reg-bedrijf" placeholder="bijv. Afbouw BV" autocomplete="organization" />
+        </div>
+        <div class="card-actions">
+          <button class="btn btn-primary" id="btn-registreren">Account aanmaken</button>
+        </div>
+      </div>
+
+      <p class="account-hint">
+        Geen account nodig om de calculatoren te gebruiken. Met een account kun je projecten opslaan en openen op meerdere apparaten.
+      </p>
+
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         VIEW B: INGELOGD — Profiel
+    ══════════════════════════════════════════════ -->
+    <div id="view-profiel" style="display:none;">
+
       <div class="hub-section-head">
-        <h1 class="hub-section-title" id="account-titel">Inloggen</h1>
+        <h1 class="hub-section-title" id="profiel-titel">Mijn account</h1>
       </div>
 
-      <!-- Status berichten -->
-      <div id="account-status" class="account-status" style="display:none;"></div>
-
-      <!-- Ingelogd: toon profiel -->
-      <div id="view-profiel" style="display:none;">
-        <div class="card input-card">
-          <p class="account-email" id="account-email-display"></p>
-          <div class="card-actions">
-            <button class="btn btn-outline" id="btn-uitloggen">Uitloggen</button>
+      <!-- Profielgegevens (readonly weergave) -->
+      <div class="card input-card" id="card-profiel-weergave">
+        <div class="profiel-weergave">
+          <div class="profiel-avatar" id="profiel-avatar">?</div>
+          <div class="profiel-info">
+            <div class="profiel-naam" id="profiel-naam-display">—</div>
+            <div class="profiel-email" id="profiel-email-display">—</div>
+            <div class="profiel-bedrijf" id="profiel-bedrijf-display" style="display:none;"></div>
           </div>
         </div>
-        <p class="account-hint">Projecten die je opslaat worden gekoppeld aan dit account en zijn beschikbaar op al je apparaten.</p>
-      </div>
-
-      <!-- Niet ingelogd: login/registreer formulier -->
-      <div id="view-auth">
-        <div class="card input-card">
-
-          <div class="form-group">
-            <label for="auth-email">E-mailadres</label>
-            <input type="email" id="auth-email" placeholder="jouw@email.nl" autocomplete="email" />
-          </div>
-
-          <div class="form-group">
-            <label for="auth-wachtwoord">Wachtwoord</label>
-            <input type="password" id="auth-wachtwoord" placeholder="Minimaal 6 tekens" autocomplete="current-password" />
-          </div>
-
-          <div class="card-actions">
-            <button class="btn btn-primary" id="btn-inloggen">Inloggen</button>
-            <button class="btn btn-outline" id="btn-registreren">Nieuw account</button>
-          </div>
-
+        <div class="card-actions">
+          <button class="btn btn-outline btn-sm" id="btn-bewerken">Gegevens wijzigen</button>
+          <button class="btn btn-ghost btn-sm" id="btn-uitloggen">Uitloggen</button>
         </div>
-
-        <p class="account-hint">
-          Geen account nodig om de calculatoren te gebruiken. Een account geeft je de mogelijkheid om projecten op te slaan en te openen op meerdere apparaten.
-        </p>
       </div>
 
-    </section>
+      <!-- Profielgegevens bewerkbaar (verborgen totdat je op Wijzigen klikt) -->
+      <div class="card input-card" id="card-profiel-bewerken" style="display:none;">
+        <h2 class="card-title">Gegevens wijzigen</h2>
+        <div class="form-grid form-grid-2col">
+          <div class="form-group">
+            <label for="edit-voornaam">Voornaam</label>
+            <input type="text" id="edit-voornaam" autocomplete="given-name" />
+          </div>
+          <div class="form-group">
+            <label for="edit-achternaam">Achternaam</label>
+            <input type="text" id="edit-achternaam" autocomplete="family-name" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="edit-bedrijf">
+            Bedrijfsnaam <span class="optioneel-tag">optioneel</span>
+          </label>
+          <input type="text" id="edit-bedrijf" autocomplete="organization" />
+        </div>
+        <div class="form-group">
+          <label for="edit-wachtwoord">
+            Nieuw wachtwoord <span class="optioneel-tag">optioneel</span>
+          </label>
+          <input type="password" id="edit-wachtwoord" placeholder="Laat leeg om niet te wijzigen" autocomplete="new-password" />
+        </div>
+        <div class="card-actions">
+          <button class="btn btn-primary" id="btn-opslaan">Opslaan</button>
+          <button class="btn btn-ghost" id="btn-annuleer">Annuleren</button>
+        </div>
+      </div>
+
+      <p class="account-hint">
+        Je gegevens worden alleen gebruikt voor personalisatie binnen Afbouwr. We delen ze niet met derden.
+      </p>
+
+    </div>
 
   </div>
 
   <site-footer></site-footer>
 
-  <!-- Supabase SDK (CDN) -->
+  <!-- Supabase SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="../supabase.js"></script>
   <script src="../auth.js"></script>
-  <script src="../components.js?v=3.3"></script>
+  <script src="../components.js?v=3.5"></script>
 
   <script>
   'use strict';
 
-  const elTitel        = document.getElementById('account-titel');
-  const elStatus       = document.getElementById('account-status');
-  const elEmail        = document.getElementById('auth-email');
-  const elWachtwoord   = document.getElementById('auth-wachtwoord');
-  const btnInloggen    = document.getElementById('btn-inloggen');
-  const btnRegistreren = document.getElementById('btn-registreren');
-  const btnUitloggen   = document.getElementById('btn-uitloggen');
-  const viewProfiel    = document.getElementById('view-profiel');
-  const viewAuth       = document.getElementById('view-auth');
-  const emailDisplay   = document.getElementById('account-email-display');
+  // ── DOM-referenties ──────────────────────────────────────────────────────────
+  const elStatus           = document.getElementById('account-status');
+  const viewAuth           = document.getElementById('view-auth');
+  const viewProfiel        = document.getElementById('view-profiel');
+  const tabInloggen        = document.getElementById('tab-inloggen');
+  const tabRegistreren     = document.getElementById('tab-registreren');
+  const formInloggen       = document.getElementById('form-inloggen');
+  const formRegistreren    = document.getElementById('form-registreren');
+  const cardWeergave       = document.getElementById('card-profiel-weergave');
+  const cardBewerken       = document.getElementById('card-profiel-bewerken');
 
+  // ── Status helper ────────────────────────────────────────────────────────────
   function toonStatus(bericht, type) {
-    elStatus.textContent  = bericht;
-    elStatus.className    = `account-status account-status-${type}`;
+    elStatus.textContent   = bericht;
+    elStatus.className     = `account-status account-status-${type}`;
     elStatus.style.display = 'block';
-    if (type === 'succes') setTimeout(() => { elStatus.style.display = 'none'; }, 4000);
+    elStatus.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    if (type === 'succes') setTimeout(() => { elStatus.style.display = 'none'; }, 5000);
   }
 
-  function toonProfiel(gebruiker) {
-    elTitel.textContent          = 'Mijn account';
-    emailDisplay.textContent     = gebruiker.email || '';
-    viewProfiel.style.display    = 'block';
-    viewAuth.style.display       = 'none';
-  }
-
-  function toonLogin() {
-    elTitel.textContent       = 'Inloggen';
-    viewProfiel.style.display = 'none';
-    viewAuth.style.display    = 'block';
-  }
-
-  // Luister naar auth state
-  Auth.onAuthVerandering(gebruiker => {
-    if (gebruiker) toonProfiel(gebruiker);
-    else toonLogin();
+  // ── Tab-wisseling ────────────────────────────────────────────────────────────
+  tabInloggen.addEventListener('click', () => {
+    tabInloggen.classList.add('active');
+    tabRegistreren.classList.remove('active');
+    formInloggen.style.display    = '';
+    formRegistreren.style.display = 'none';
+    elStatus.style.display = 'none';
   });
 
-  // Inloggen
-  btnInloggen.addEventListener('click', async () => {
-    const email = elEmail.value.trim();
-    const ww    = elWachtwoord.value;
-    if (!email || !ww) { toonStatus('Vul e-mailadres en wachtwoord in.', 'fout'); return; }
+  tabRegistreren.addEventListener('click', () => {
+    tabRegistreren.classList.add('active');
+    tabInloggen.classList.remove('active');
+    formRegistreren.style.display = '';
+    formInloggen.style.display    = 'none';
+    elStatus.style.display = 'none';
+  });
 
-    btnInloggen.disabled = true;
-    btnInloggen.textContent = 'Even wachten…';
+  // ── Inloggen ─────────────────────────────────────────────────────────────────
+  document.getElementById('btn-inloggen').addEventListener('click', async () => {
+    const email = document.getElementById('login-email').value.trim();
+    const ww    = document.getElementById('login-wachtwoord').value;
+    if (!email || !ww) { toonStatus('Vul je e-mailadres en wachtwoord in.', 'fout'); return; }
+
+    const btn = document.getElementById('btn-inloggen');
+    btn.disabled = true; btn.textContent = 'Even wachten…';
+
     const { fout } = await Auth.inloggen(email, ww);
-    btnInloggen.disabled = false;
-    btnInloggen.textContent = 'Inloggen';
 
+    btn.disabled = false; btn.textContent = 'Inloggen';
     if (fout) toonStatus(fout, 'fout');
-    else toonStatus('Succesvol ingelogd.', 'succes');
+    else {
+      toonStatus('Je bent ingelogd. Je wordt doorgestuurd…', 'succes');
+      setTimeout(() => { window.location.href = '/'; }, 1200);
+    }
   });
 
-  // Registreren
-  btnRegistreren.addEventListener('click', async () => {
-    const email = elEmail.value.trim();
-    const ww    = elWachtwoord.value;
-    if (!email || !ww) { toonStatus('Vul e-mailadres en wachtwoord in.', 'fout'); return; }
-
-    btnRegistreren.disabled = true;
-    btnRegistreren.textContent = 'Even wachten…';
-    const { fout } = await Auth.registreren(email, ww);
-    btnRegistreren.disabled = false;
-    btnRegistreren.textContent = 'Nieuw account';
-
-    if (fout) toonStatus(fout, 'fout');
-    else toonStatus('Account aangemaakt. Controleer je e-mail om te bevestigen.', 'succes');
+  document.getElementById('login-wachtwoord').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('btn-inloggen').click();
   });
 
-  // Uitloggen
-  btnUitloggen.addEventListener('click', async () => {
+  // ── Registreren ──────────────────────────────────────────────────────────────
+  document.getElementById('btn-registreren').addEventListener('click', async () => {
+    const voornaam   = document.getElementById('reg-voornaam').value.trim();
+    const achternaam = document.getElementById('reg-achternaam').value.trim();
+    const email      = document.getElementById('reg-email').value.trim();
+    const ww         = document.getElementById('reg-wachtwoord').value;
+    const bedrijf    = document.getElementById('reg-bedrijf').value.trim();
+
+    if (!voornaam)   { toonStatus('Vul je voornaam in.', 'fout'); return; }
+    if (!achternaam) { toonStatus('Vul je achternaam in.', 'fout'); return; }
+    if (!email)      { toonStatus('Vul je e-mailadres in.', 'fout'); return; }
+    if (!ww)         { toonStatus('Kies een wachtwoord.', 'fout'); return; }
+
+    const btn = document.getElementById('btn-registreren');
+    btn.disabled = true; btn.textContent = 'Even wachten…';
+
+    const { fout } = await Auth.registreren(email, ww, { voornaam, achternaam, bedrijf });
+
+    btn.disabled = false; btn.textContent = 'Account aanmaken';
+    if (fout) toonStatus(fout, 'fout');
+    else toonStatus('Account aangemaakt! Controleer je e-mail om je adres te bevestigen voordat je inlogt.', 'succes');
+  });
+
+  // ── Profiel weergeven ────────────────────────────────────────────────────────
+  async function laadProfiel() {
+    const meta = await Auth.getMetadata();
+    const voornaam   = meta.voornaam   || '';
+    const achternaam = meta.achternaam || '';
+    const volledigeNaam = [voornaam, achternaam].filter(Boolean).join(' ') || meta.email || '—';
+
+    document.getElementById('profiel-naam-display').textContent  = volledigeNaam;
+    document.getElementById('profiel-email-display').textContent = meta.email || '';
+    document.getElementById('profiel-avatar').textContent        = voornaam ? voornaam[0].toUpperCase() : (meta.email?.[0] || '?').toUpperCase();
+    document.getElementById('profiel-titel').textContent         = voornaam ? `Hoi, ${voornaam}` : 'Mijn account';
+
+    const bedrijfEl = document.getElementById('profiel-bedrijf-display');
+    if (meta.bedrijf) {
+      bedrijfEl.textContent    = meta.bedrijf;
+      bedrijfEl.style.display  = '';
+    } else {
+      bedrijfEl.style.display  = 'none';
+    }
+
+    // Vul bewerkformulier voor
+    document.getElementById('edit-voornaam').value   = voornaam;
+    document.getElementById('edit-achternaam').value = achternaam;
+    document.getElementById('edit-bedrijf').value    = meta.bedrijf || '';
+  }
+
+  // ── Bewerken / annuleren ─────────────────────────────────────────────────────
+  document.getElementById('btn-bewerken').addEventListener('click', () => {
+    cardWeergave.style.display  = 'none';
+    cardBewerken.style.display  = '';
+  });
+
+  document.getElementById('btn-annuleer').addEventListener('click', () => {
+    cardBewerken.style.display  = 'none';
+    cardWeergave.style.display  = '';
+    elStatus.style.display      = 'none';
+  });
+
+  // ── Opslaan ──────────────────────────────────────────────────────────────────
+  document.getElementById('btn-opslaan').addEventListener('click', async () => {
+    const voornaam   = document.getElementById('edit-voornaam').value.trim();
+    const achternaam = document.getElementById('edit-achternaam').value.trim();
+    const bedrijf    = document.getElementById('edit-bedrijf').value.trim();
+    const wachtwoord = document.getElementById('edit-wachtwoord').value;
+
+    if (!voornaam)   { toonStatus('Voornaam mag niet leeg zijn.', 'fout'); return; }
+    if (!achternaam) { toonStatus('Achternaam mag niet leeg zijn.', 'fout'); return; }
+
+    const btn = document.getElementById('btn-opslaan');
+    btn.disabled = true; btn.textContent = 'Opslaan…';
+
+    const { fout } = await Auth.profielBijwerken({ voornaam, achternaam, bedrijf, wachtwoord: wachtwoord || null });
+
+    btn.disabled = false; btn.textContent = 'Opslaan';
+
+    if (fout) {
+      toonStatus(fout, 'fout');
+    } else {
+      document.getElementById('edit-wachtwoord').value = '';
+      cardBewerken.style.display = 'none';
+      cardWeergave.style.display = '';
+      await laadProfiel();
+      toonStatus('Gegevens opgeslagen.', 'succes');
+    }
+  });
+
+  // ── Uitloggen ────────────────────────────────────────────────────────────────
+  document.getElementById('btn-uitloggen').addEventListener('click', async () => {
     await Auth.uitloggen();
-    toonStatus('Je bent uitgelogd.', 'succes');
+    // onAuthVerandering handelt de UI-switch af
   });
 
-  // Enter in wachtwoord veld → inloggen
-  elWachtwoord.addEventListener('keydown', e => {
-    if (e.key === 'Enter') btnInloggen.click();
+  // ── Auth state ───────────────────────────────────────────────────────────────
+  Auth.onAuthVerandering(async gebruiker => {
+    if (gebruiker) {
+      viewAuth.style.display    = 'none';
+      viewProfiel.style.display = '';
+      await laadProfiel();
+    } else {
+      viewAuth.style.display    = '';
+      viewProfiel.style.display = 'none';
+      elStatus.style.display    = 'none';
+    }
   });
   </script>
 

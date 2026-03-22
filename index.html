@@ -19,7 +19,7 @@
   <meta name="twitter:title"       content="Afbouwr — Gratis materiaalcalculatoren voor de afbouw" />
   <meta name="twitter:description" content="Gratis materiaalcalculatoren voor afbouwbedrijven. Snel en betrouwbaar." />
 
-  <link rel="stylesheet" href="style.css?v=3.3" />
+  <link rel="stylesheet" href="style.css?v=3.5" />
 
   <!-- JSON-LD Structured Data -->
   <script type="application/ld+json">
@@ -62,6 +62,11 @@
       <p class="hero-desc anim-up-2">
         Praktische calculatoren voor de dagelijkse praktijk. Vul in, bereken, klaar.
       </p>
+      <!-- Welkomstbericht — alleen zichtbaar als ingelogd, gevuld via JS -->
+      <div id="hero-welkom" class="hero-welkom" style="display:none;">
+        <span id="hero-welkom-tekst"></span>
+        <a href="/account/" class="hero-welkom-link">Mijn account</a>
+      </div>
     </section>
 
     <!-- ── CALCULATOREN ── -->
@@ -218,7 +223,26 @@
   <site-footer></site-footer>
 
   <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
-  <script src="components.js?v=3.3"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="supabase.js"></script>
+  <script src="auth.js"></script>
+  <script src="components.js?v=3.5"></script>
+  <script>
+    'use strict';
+
+    // ── Welkomstbericht ────────────────────────────────────────────────────
+    Auth.onAuthVerandering(gebruiker => {
+      const welkomEl  = document.getElementById('hero-welkom');
+      const tekstEl   = document.getElementById('hero-welkom-tekst');
+      if (gebruiker) {
+        const voornaam = gebruiker.user_metadata?.voornaam || '';
+        tekstEl.textContent   = voornaam ? `Welkom terug, ${voornaam}! ` : 'Welkom terug! ';
+        welkomEl.style.display = '';
+      } else {
+        welkomEl.style.display = 'none';
+      }
+    });
+  </script>
   <script>
     'use strict';
     // ── Bug formulier ──────────────────────────────────────────────────────

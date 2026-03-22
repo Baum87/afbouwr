@@ -28,18 +28,20 @@
 
 class SiteNav extends HTMLElement {
   connectedCallback() {
-    const isBack  = this.getAttribute('back') === 'true';
+    const isBack = this.getAttribute('back') === 'true';
+
+    const accountLink = `<a href="/account/" class="nav-account-link" id="nav-account-btn">Account</a>`;
 
     const right = isBack
       ? `<div class="nav-back-row">
            <a href="/" class="nav-back">← Alle calculators</a>
-           <a href="/account/" class="nav-account-link" id="nav-account-btn">Account</a>
+           ${accountLink}
          </div>`
       : `<ul class="nav-links">
            <li><a href="#tools">Calculatoren</a></li>
            <li><a href="#roadmap">Roadmap</a></li>
            <li><a href="#bug">Bug melden</a></li>
-           <li><a href="/account/" class="nav-account-link" id="nav-account-btn">Account</a></li>
+           <li>${accountLink}</li>
          </ul>`;
 
     this.innerHTML = `
@@ -51,6 +53,41 @@ class SiteNav extends HTMLElement {
         ${right}
       </nav>
     `;
+
+    // Personaliseer de account-knop zodra auth beschikbaar is
+    this._updateAccountKnop();
+  }
+
+  _updateAccountKnop() {
+    const sb = window.getSupabase ? window.getSupabase() : null;
+    if (!sb) return;
+
+    sb.auth.getSession().then(({ data }) => {
+      const user = data?.session?.user;
+      if (!user) return;
+
+      const voornaam = user.user_metadata?.voornaam || '';
+      const btn = document.getElementById('nav-account-btn');
+      if (!btn) return;
+
+      btn.textContent = voornaam ? `Hoi, ${voornaam}` : 'Mijn account';
+      btn.classList.add('ingelogd');
+    });
+
+    sb.auth.onAuthStateChange((_event, sessie) => {
+      const user    = sessie?.user;
+      const btn     = document.getElementById('nav-account-btn');
+      if (!btn) return;
+
+      if (user) {
+        const voornaam = user.user_metadata?.voornaam || '';
+        btn.textContent = voornaam ? `Hoi, ${voornaam}` : 'Mijn account';
+        btn.classList.add('ingelogd');
+      } else {
+        btn.textContent = 'Account';
+        btn.classList.remove('ingelogd');
+      }
+    });
   }
 }
 
