@@ -1478,6 +1478,7 @@ hr { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
+  align-items: start;
 }
 .form-grid-2col input,
 .form-grid-2col select {
