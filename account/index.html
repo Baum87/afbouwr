@@ -35,7 +35,10 @@
           <input type="email" id="login-email" placeholder="jouw@email.nl" autocomplete="email" />
         </div>
         <div class="form-group">
-          <label for="login-wachtwoord">Wachtwoord</label>
+          <label for="login-wachtwoord">
+            Wachtwoord
+            <button type="button" class="reset-link" id="btn-wachtwoord-vergeten">Wachtwoord vergeten?</button>
+          </label>
           <input type="password" id="login-wachtwoord" placeholder="Jouw wachtwoord" autocomplete="current-password" />
         </div>
         <div class="card-actions">
@@ -81,7 +84,46 @@
     </div>
 
     <!-- ══════════════════════════════════════════════
-         VIEW B: INGELOGD — Profiel
+         VIEW B: WACHTWOORD VERGETEN
+    ══════════════════════════════════════════════ -->
+    <div id="view-reset" style="display:none;">
+      <div class="hub-section-head">
+        <h1 class="hub-section-title">Wachtwoord vergeten</h1>
+      </div>
+      <div class="card input-card">
+        <p class="reset-info">Vul je e-mailadres in. Je ontvangt een link om een nieuw wachtwoord in te stellen.</p>
+        <div class="form-group">
+          <label for="reset-email">E-mailadres</label>
+          <input type="email" id="reset-email" placeholder="jouw@email.nl" autocomplete="email" />
+        </div>
+        <div class="card-actions">
+          <button class="btn btn-primary" id="btn-reset-verzenden">Stuur resetlink</button>
+          <button class="btn btn-ghost" id="btn-reset-annuleer">Annuleren</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         VIEW C: NIEUW WACHTWOORD INSTELLEN
+         (na klik op resetlink in e-mail)
+    ══════════════════════════════════════════════ -->
+    <div id="view-nieuw-wachtwoord" style="display:none;">
+      <div class="hub-section-head">
+        <h1 class="hub-section-title">Nieuw wachtwoord</h1>
+      </div>
+      <div class="card input-card">
+        <div class="form-group">
+          <label for="nieuw-wachtwoord">Nieuw wachtwoord</label>
+          <input type="password" id="nieuw-wachtwoord" placeholder="Minimaal 6 tekens" autocomplete="new-password" />
+        </div>
+        <div class="card-actions">
+          <button class="btn btn-primary" id="btn-wachtwoord-opslaan">Wachtwoord opslaan</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         VIEW D: INGELOGD — Profiel
     ══════════════════════════════════════════════ -->
     <div id="view-profiel" style="display:none;">
 
@@ -156,15 +198,23 @@
   'use strict';
 
   // ── DOM-referenties ──────────────────────────────────────────────────────────
-  const elStatus           = document.getElementById('account-status');
-  const viewAuth           = document.getElementById('view-auth');
-  const viewProfiel        = document.getElementById('view-profiel');
-  const tabInloggen        = document.getElementById('tab-inloggen');
-  const tabRegistreren     = document.getElementById('tab-registreren');
-  const formInloggen       = document.getElementById('form-inloggen');
-  const formRegistreren    = document.getElementById('form-registreren');
-  const cardWeergave       = document.getElementById('card-profiel-weergave');
-  const cardBewerken       = document.getElementById('card-profiel-bewerken');
+  const elStatus              = document.getElementById('account-status');
+  const viewAuth              = document.getElementById('view-auth');
+  const viewReset             = document.getElementById('view-reset');
+  const viewNieuwWachtwoord   = document.getElementById('view-nieuw-wachtwoord');
+  const viewProfiel           = document.getElementById('view-profiel');
+  const tabInloggen           = document.getElementById('tab-inloggen');
+  const tabRegistreren        = document.getElementById('tab-registreren');
+  const formInloggen          = document.getElementById('form-inloggen');
+  const formRegistreren       = document.getElementById('form-registreren');
+  const cardWeergave          = document.getElementById('card-profiel-weergave');
+  const cardBewerken          = document.getElementById('card-profiel-bewerken');
+
+  function toonView(view) {
+    [viewAuth, viewReset, viewNieuwWachtwoord, viewProfiel].forEach(v => v.style.display = 'none');
+    view.style.display = '';
+    elStatus.style.display = 'none';
+  }
 
   // ── Status helper ────────────────────────────────────────────────────────────
   function toonStatus(bericht, type) {
@@ -310,18 +360,71 @@
     // onAuthVerandering handelt de UI-switch af
   });
 
-  // ── Auth state ───────────────────────────────────────────────────────────────
-  Auth.onAuthVerandering(async gebruiker => {
-    if (gebruiker) {
-      viewAuth.style.display    = 'none';
-      viewProfiel.style.display = '';
-      await laadProfiel();
+  // ── Wachtwoord vergeten ───────────────────────────────────────────────────────
+  document.getElementById('btn-wachtwoord-vergeten').addEventListener('click', () => {
+    const email = document.getElementById('login-email').value.trim();
+    if (email) document.getElementById('reset-email').value = email;
+    toonView(viewReset);
+  });
+
+  document.getElementById('btn-reset-annuleer').addEventListener('click', () => {
+    toonView(viewAuth);
+  });
+
+  document.getElementById('btn-reset-verzenden').addEventListener('click', async () => {
+    const email = document.getElementById('reset-email').value.trim();
+    if (!email) { toonStatus('Vul je e-mailadres in.', 'fout'); return; }
+
+    const btn = document.getElementById('btn-reset-verzenden');
+    btn.disabled = true; btn.textContent = 'Even wachten…';
+
+    const { fout } = await Auth.wachtwoordReset(email);
+
+    btn.disabled = false; btn.textContent = 'Stuur resetlink';
+    if (fout) {
+      toonStatus(fout, 'fout');
     } else {
-      viewAuth.style.display    = '';
-      viewProfiel.style.display = 'none';
-      elStatus.style.display    = 'none';
+      toonStatus('E-mail verstuurd. Controleer je inbox en klik op de link om je wachtwoord opnieuw in te stellen.', 'succes');
+      setTimeout(() => toonView(viewAuth), 6000);
     }
   });
+
+  // ── Nieuw wachtwoord opslaan (na resetlink) ───────────────────────────────────
+  document.getElementById('btn-wachtwoord-opslaan').addEventListener('click', async () => {
+    const ww = document.getElementById('nieuw-wachtwoord').value;
+    if (!ww) { toonStatus('Vul een nieuw wachtwoord in.', 'fout'); return; }
+
+    const btn = document.getElementById('btn-wachtwoord-opslaan');
+    btn.disabled = true; btn.textContent = 'Opslaan…';
+
+    const { fout } = await Auth.profielBijwerken({ wachtwoord: ww });
+
+    btn.disabled = false; btn.textContent = 'Wachtwoord opslaan';
+    if (fout) {
+      toonStatus(fout, 'fout');
+    } else {
+      toonStatus('Wachtwoord opgeslagen. Je bent nu ingelogd.', 'succes');
+      setTimeout(() => { window.location.href = '/'; }, 1500);
+    }
+  });
+
+  // ── Auth state ───────────────────────────────────────────────────────────────
+  const sb = window.getSupabase ? window.getSupabase() : null;
+  if (sb) {
+    sb.auth.onAuthStateChange((event, sessie) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        toonView(viewNieuwWachtwoord);
+        return;
+      }
+      const gebruiker = sessie?.user || null;
+      if (gebruiker) {
+        toonView(viewProfiel);
+        laadProfiel();
+      } else {
+        toonView(viewAuth);
+      }
+    });
+  }
   </script>
 
 </body>

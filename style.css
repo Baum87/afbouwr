@@ -1410,6 +1410,28 @@ hr { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
   margin-bottom: 0;
 }
 
+/* Wachtwoord vergeten link (inline in label) */
+.reset-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 12px;
+  color: var(--accent);
+  cursor: pointer;
+  float: right;
+  font-weight: 400;
+  line-height: inherit;
+}
+.reset-link:hover { text-decoration: underline; }
+
+/* Informatietekst in reset-kaart */
+.reset-info {
+  font-size: 14px;
+  color: var(--ink-2, var(--ink-3));
+  margin: 0 0 20px;
+  line-height: 1.6;
+}
+
 /* Profiel weergave (avatar + naam + email) */
 .profiel-weergave {
   display: flex;

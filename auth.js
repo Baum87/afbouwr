@@ -57,6 +57,17 @@ const Auth = (() => {
     };
   }
 
+  // ── Wachtwoord vergeten ──────────────────────────────────────────────────────
+
+  async function wachtwoordReset(email) {
+    const sb = client();
+    if (!sb) return { fout: 'Supabase niet beschikbaar.' };
+    const { error } = await sb.auth.resetPasswordForEmail(email, {
+      redirectTo: 'https://www.afbouwr.nl/account/',
+    });
+    return { fout: error ? vertaalFout(error.message) : null };
+  }
+
   // ── Uitloggen ────────────────────────────────────────────────────────────────
 
   async function uitloggen() {
@@ -132,7 +143,7 @@ const Auth = (() => {
     return msg;
   }
 
-  return { inloggen, registreren, uitloggen, getSessie, getMetadata, profielBijwerken, onAuthVerandering };
+  return { inloggen, registreren, uitloggen, wachtwoordReset, getSessie, getMetadata, profielBijwerken, onAuthVerandering };
 
 })();
 
