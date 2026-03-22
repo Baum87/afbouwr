@@ -176,6 +176,18 @@ code {
 }
 .nav-back:hover { color: var(--ink); gap: .5rem; }
 
+.nav-back-row {
+  display: flex; align-items: center; gap: 1.5rem;
+}
+
+.nav-account-link {
+  font-size: .82rem; color: var(--ink-2); text-decoration: none;
+  padding: 4px 12px; border: 1.5px solid var(--border); border-radius: 20px;
+  transition: color .15s, border-color .15s;
+}
+.nav-account-link:hover { color: var(--ink); border-color: var(--ink-3); }
+.nav-account-link.ingelogd { border-color: var(--accent); color: var(--accent); }
+
 body.has-nav { padding-top: 56px; }
 
 /* ==========================================================================
@@ -632,6 +644,10 @@ body.has-nav { padding-top: 56px; }
   border-bottom: 1px solid var(--border);
 }
 
+.table-header-actions {
+  display: flex; align-items: center; gap: 6px;
+}
+
 .table-header h3 {
   font-size: 14px; font-weight: 600; letter-spacing: -.01em;
   display: flex; align-items: center; gap: 10px; color: var(--ink);
@@ -695,6 +711,14 @@ tr.totaal-categorie-header td {
 
 tr.extra-rij td { color: var(--ink-2); font-style: italic; }
 tr.extra-rij td:first-child { font-style: normal; color: var(--ink); }
+
+/* Affiliate links in tabellen */
+.affiliate-link {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: inherit;
+}
+.affiliate-link:hover { text-decoration: underline; }
 
 .num { font-family: var(--mono); }
 
@@ -1313,26 +1337,148 @@ hr { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
 }
 
 /* ==========================================================================
+   ACCOUNT PAGINA
+   ========================================================================== */
+
+.account-status {
+  padding: 12px 16px;
+  border-radius: var(--r-sm);
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+.account-status-succes { background: #e6f4ec; color: #1a6637; border: 1px solid #a8d5b5; }
+.account-status-fout   { background: #fdecea; color: #9b2020; border: 1px solid #f5afa8; }
+
+.account-email {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0 0 16px;
+}
+
+.account-hint {
+  font-size: 13px;
+  color: var(--ink-3);
+  margin-top: 16px;
+  line-height: 1.6;
+}
+
+/* ==========================================================================
+   INFO / FAQ SECTIE
+   ========================================================================== */
+
+.info-sectie {
+  max-width: var(--app-max-w);
+  margin: 0 auto;
+  padding: 40px 24px 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+}
+
+.info-blok h2 {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.info-blok p {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--ink-2);
+  margin: 0 0 10px;
+}
+
+.info-blok ul {
+  margin: 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.info-blok ul li {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink-2);
+}
+
+.faq-lijst {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.faq-lijst dt {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 3px;
+}
+
+.faq-lijst dd {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--ink-2);
+  margin: 0;
+  padding-left: 14px;
+  border-left: 2px solid var(--border);
+}
+
+@media (max-width: 600px) {
+  .info-sectie { padding: 28px 16px 48px; gap: 28px; }
+  .info-blok h2 { font-size: 15px; }
+}
+
+/* ==========================================================================
    PRINT
    ========================================================================== */
 
 @media print {
-  body, body::before    { background: white; }
-  body::before          { display: none; }
-  .nav, .site-footer,
-  .no-print, .btn-reset,
+  /* ── Reset achtergrond ── */
+  body, body::before { background: white; }
+  body::before       { display: none; }
+
+  /* ── Verberg alles wat niet afgedrukt hoeft ── */
+  .nav,
+  .site-footer,
+  .no-print,
+  .input-card,
   .card-actions,
   .table-actions,
+  .sectie-scheiding,
+  .btn,
+  .btn-reset,
   .btn-delete,
   .btn-delete-room,
   .handmatig-invoer,
-  .input-card,
-  .sectie-scheiding,
-  .results-section .table-card:not(.totalen-card) { display: none !important; }
-  .app-wrapper          { max-width: 100%; padding: 0; }
-  .table-card           { box-shadow: none; border: 1px solid var(--border); break-inside: avoid; margin-bottom: 14px; }
-  .app-header           { border-bottom: 2px solid #000; padding: 10px 0; margin-bottom: 14px; }
-  .project-invoer input { border: none; font-size: 18px; font-weight: 700; width: auto; padding: 0; pointer-events: none; }
-  .project-invoer label { display: none; }
-  .btn                  { display: none !important; }
+  .results-section .table-card:not(.overzicht-card):not(.totalen-card) { display: none !important; }
+
+  /* ── Layout ── */
+  .app-wrapper   { max-width: 100%; padding: 0; }
+  .main-content  { padding: 0; gap: 12px; }
+
+  /* ── Koptekst: toon alleen projectnaam ── */
+  .app-header            { border-bottom: 2px solid #000; padding: 12px 0; margin-bottom: 16px; }
+  .header-inner          { justify-content: space-between; align-items: baseline; }
+  .brand-eyebrow         { display: none; }
+  .header-rechts         { gap: 0; }
+  .project-invoer        { display: flex; align-items: baseline; gap: 8px; }
+  .project-invoer label  { font-size: 11px; font-weight: 600; color: #666; text-transform: uppercase; display: block; }
+  .project-invoer input  { border: none; font-size: 16px; font-weight: 700; padding: 0; pointer-events: none; background: transparent; width: auto; min-width: 200px; }
+
+  /* ── Tabelkaarten ── */
+  .table-card            { box-shadow: none; border: 1px solid #ccc; break-inside: avoid; margin-bottom: 14px; page-break-inside: avoid; }
+  .table-header          { padding: 10px 16px; }
+  .table-header h3       { font-size: 13px; }
+  .table-wrapper         { overflow: visible; }
+  table                  { font-size: 11px; }
+  th, td                 { padding: 5px 8px; }
+
+  /* ── Paginamarges ── */
+  @page { margin: 18mm 16mm; }
 }

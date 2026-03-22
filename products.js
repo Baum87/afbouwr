@@ -1,34 +1,28 @@
 /**
- * Afbouwr — Productcatalogus
+ * Afbouwr — Productcatalogus loader
  *
- * Voeg hier merken en typen toe. De calculators lezen deze config
- * automatisch in — geen HTML aanpassen nodig.
+ * Producten worden geladen vanuit /data/products.json.
+ * Dat bestand is de enige plek die je hoeft aan te passen om producten
+ * toe te voegen, te wijzigen of te verwijderen — geen code-kennis vereist.
  *
- * Structuur:
- *   plafondplaten  → gebruikt door Systeemplafond calculator
- *   gipstypen      → gebruikt door Metalstud Wand calculator
+ * Gebruik in de calculators:
+ *   window.PRODUCTEN_READY.then(() => { ... PRODUCTEN.plafondplaten ... });
  *
- * Veld 'vasteMaten' → overschrijft de gebruikersinput voor breedte/lengte
- * als een gipstype een afwijkende standaardmaat heeft (bijv. OSB, 4-AK).
+ * Bij een netwerk- of parsefout valt de loader terug op de ingebouwde data.
  */
 
 'use strict';
 
-const PRODUCTEN = {
-
-  // ── Systeemplafond — plafondplaten ────────────────────────────────────────
-  //
-  // waarde : wordt opgeslagen in het project (zichtbaar in exportoverzicht)
-  // label  : weergave in de dropdown
-  //
+// ── Ingebouwde fallback (identiek aan data/products.json) ──────────────────
+const _FALLBACK = {
   plafondplaten: [
     {
       merk: 'Knauf',
       typen: [
-        { waarde: 'Knauf Sahara',    label: 'Sahara' },
-        { waarde: 'Knauf Feria',     label: 'Feria' },
-        { waarde: 'Knauf Perla OP',  label: 'Perla OP 0.95' },
-        { waarde: 'Knauf Tatra',     label: 'Tatra' },
+        { waarde: 'Knauf Sahara',   label: 'Sahara' },
+        { waarde: 'Knauf Feria',    label: 'Feria' },
+        { waarde: 'Knauf Perla OP', label: 'Perla OP 0.95' },
+        { waarde: 'Knauf Tatra',    label: 'Tatra' },
       ],
     },
     {
@@ -60,22 +54,40 @@ const PRODUCTEN = {
       ],
     },
   ],
-
-  // ── Metalstud Wand — gipstypen ────────────────────────────────────────────
-  //
-  // waarde     : interne sleutel (wordt opgeslagen in project)
-  // label      : weergave in de dropdown
-  // vasteMaten : { breedte: mm, lengte: mm } — vult breedte/lengte automatisch
-  //              in als dit type een afwijkende standaardmaat heeft.
-  //              null = geen vaste maat (gebruikersinput geldt).
-  //
   gipstypen: [
-    { waarde: 'standaard_ak',   label: 'Standaard AK',          vasteMaten: null },
-    { waarde: 'standaard_4ak',  label: 'Standaard 4-AK',        vasteMaten: { breedte: 1200, lengte: 2400 } },
-    { waarde: 'hydro',          label: 'Hydro (groen)',          vasteMaten: null },
-    { waarde: 'ladura',         label: 'Ladura Standaard',       vasteMaten: null },
-    { waarde: 'novlam',         label: 'Novlam (roze)',          vasteMaten: null },
-    { waarde: 'osb',            label: 'OSB',                   vasteMaten: { breedte: 1250, lengte: 2500 } },
+    { waarde: 'standaard_ak',  label: 'Standaard AK',    vasteMaten: null },
+    { waarde: 'standaard_4ak', label: 'Standaard 4-AK',  vasteMaten: { breedte: 1200, lengte: 2400 } },
+    { waarde: 'hydro',         label: 'Hydro (groen)',    vasteMaten: null },
+    { waarde: 'ladura',        label: 'Ladura Standaard', vasteMaten: null },
+    { waarde: 'novlam',        label: 'Novlam (roze)',    vasteMaten: null },
+    { waarde: 'osb',           label: 'OSB',              vasteMaten: { breedte: 1250, lengte: 2500 } },
   ],
-
 };
+
+// ── Globally toegankelijk productobject ────────────────────────────────────
+window.PRODUCTEN = {};
+
+// ── Promise die resolved zodra producten geladen zijn ─────────────────────
+let _resolve;
+window.PRODUCTEN_READY = new Promise(r => { _resolve = r; });
+
+// ── Laad data/products.json, val terug op ingebouwde data ─────────────────
+(function laadProducten() {
+  // Bepaal het pad relatief aan de root (werkt op zowel GitHub Pages als localhost)
+  const pad = '/data/products.json';
+
+  fetch(pad)
+    .then(r => {
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      return r.json();
+    })
+    .then(data => {
+      Object.assign(window.PRODUCTEN, data);
+      _resolve(window.PRODUCTEN);
+    })
+    .catch(err => {
+      console.warn('[Afbouwr] products.json niet geladen, gebruik fallback.', err.message);
+      Object.assign(window.PRODUCTEN, _FALLBACK);
+      _resolve(window.PRODUCTEN);
+    });
+})();

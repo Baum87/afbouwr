@@ -3,9 +3,60 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Metalstud Wand Rekenmachine — Afbouwr</title>
-  <meta name="description" content="Bereken U- en C-profielen, gipskarton, isolatie en schroeven voor metalstud wanden. Ondersteunt MS, MSV en dubbelwand systemen." />
+  <title>Metalstud Wand Calculator — Materiaal berekenen | Afbouwr</title>
+  <meta name="description" content="Bereken gratis hoeveel U-profielen, C-profielen, gipskarton, isolatie en schroeven je nodig hebt voor een metalstud wand. Ondersteunt MS, MSV en dubbelwand systemen." />
+  <link rel="canonical" href="https://www.afbouwr.nl/metalstudwandCalculator/" />
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="website" />
+  <meta property="og:url"         content="https://www.afbouwr.nl/metalstudwandCalculator/" />
+  <meta property="og:title"       content="Metalstud Wand Calculator — Materiaal berekenen | Afbouwr" />
+  <meta property="og:description" content="Bereken gratis hoeveel U-profielen, C-profielen, gipskarton, isolatie en schroeven je nodig hebt voor een metalstud wand. MS, MSV en dubbelwand." />
+  <meta property="og:locale"      content="nl_NL" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary" />
+  <meta name="twitter:title"       content="Metalstud Wand Calculator | Afbouwr" />
+  <meta name="twitter:description" content="Gratis materiaalberekening voor metalstud wanden. Geen account vereist." />
+
   <link rel="stylesheet" href="../style.css?v=3.3" />
+
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Metalstud Wand Calculator",
+    "url": "https://www.afbouwr.nl/metalstudwandCalculator/",
+    "description": "Gratis calculator voor metalstud wanden. Bereken U-profielen, C-profielen, gipskarton, isolatie en schroeven voor MS, MSV en dubbelwand systemen.",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "inLanguage": "nl-NL",
+    "isAccessibleForFree": true,
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "EUR"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Afbouwr",
+      "url": "https://www.afbouwr.nl/",
+      "email": "info@afbouwr.nl"
+    },
+    "featureList": [
+      "MS wand berekening",
+      "MSV wand berekening",
+      "Dubbelwand berekening",
+      "U-profiel berekening",
+      "C-profiel berekening",
+      "Gipskarton berekening",
+      "Isolatie berekening",
+      "Schroeven berekening",
+      "Meerdere wanden per project"
+    ]
+  }
+  </script>
 </head>
 <body class="has-nav">
 
@@ -208,7 +259,7 @@
       <section class="results-section" id="results-section" style="display:none;">
 
         <!-- Wandoverzicht -->
-        <div class="table-card">
+        <div class="table-card overzicht-card">
           <div class="table-header">
             <h3>Wandoverzicht</h3>
             <span class="table-count" id="count-wanden">0 wanden</span>
@@ -236,7 +287,10 @@
         <div class="table-card totalen-card">
           <div class="table-header">
             <h3>Totaaloverzicht <span class="tag">alle materialen</span></h3>
-            <button class="btn btn-outline btn-sm" id="btn-afdrukken">⎙ Afdrukken</button>
+            <div class="table-header-actions">
+              <button class="btn btn-outline btn-sm" id="btn-afdrukken">⎙ Afdrukken</button>
+              <button class="btn btn-outline btn-sm" id="btn-pdf">↓ PDF</button>
+            </div>
           </div>
           <div class="table-wrapper">
             <table id="tabel-totalen">
@@ -445,6 +499,59 @@
       </section>
 
     </main>
+
+    <!-- ── INFO / SEO / FAQ ── -->
+    <aside class="info-sectie no-print" aria-label="Uitleg en veelgestelde vragen">
+
+      <section class="info-blok">
+        <h2>Hoe werkt de metalstud wand calculator?</h2>
+        <p>
+          Voer per wand de lengte, hoogte en het wandtype in. De calculator bepaalt automatisch
+          hoeveel U-profielen (boven en onder), C-profielen (staanders), gipskartonplaten,
+          isolatie en schroeven je nodig hebt. Je kunt meerdere wanden toevoegen en het
+          totaaloverzicht per product afdrukken.
+        </p>
+        <p>
+          De tool ondersteunt drie systemen: <strong>MS</strong> (enkelvoudige wand, één laag gips),
+          <strong>MSV</strong> (enkelvoudige wand, twee lagen gips) en
+          <strong>Dubbelwand</strong> (twee wandstijlen los van elkaar, voor geluidsisolatie of
+          installatiespouw). Bij dubbelwand worden twee sets U- en C-profielen berekend.
+        </p>
+      </section>
+
+      <section class="info-blok">
+        <h2>Welke materialen berekent de tool?</h2>
+        <ul>
+          <li><strong>U-profielen</strong> — boven- en onderprofiel van de wand, lengte = wandlengte × 2.</li>
+          <li><strong>C-profielen (staanders)</strong> — hart-op-hart 600 mm, hoogte = wandhoogte + snijmarge.</li>
+          <li><strong>Gipskartonplaten</strong> — standaard AK, hydro (groen), Ladura, Novlam (roze), OSB of 4-AK. Berekend op basis van wandoppervlak met snijverlies.</li>
+          <li><strong>Isolatie</strong> — rockwool of glaswol per m², breedte afgestemd op hart-op-hart maat van de staanders.</li>
+          <li><strong>Schroeven</strong> — TN-schroeven per laag gips, berekend op gemiddeld 25 schroeven per plaat.</li>
+        </ul>
+      </section>
+
+      <section class="info-blok">
+        <h2>Veelgestelde vragen</h2>
+        <dl class="faq-lijst">
+          <dt>Hoe bereken ik het aantal C-profielen voor een metalstud wand?</dt>
+          <dd>Deel de wandlengte door de hart-op-hart afstand (600 mm) en tel 1 op voor de eindstaander. Voor een wand van 3,6 meter: (3600 ÷ 600) + 1 = 7 staanders. De calculator doet dit automatisch per wand.</dd>
+
+          <dt>Wat is het verschil tussen MS en MSV?</dt>
+          <dd>Bij een MS-wand wordt aan één of beide zijden één laag gipskarton bevestigd. Bij een MSV-wand worden twee lagen gipskarton per zijde gebruikt — dit verbetert de geluidsdemping en brandwerendheid significant.</dd>
+
+          <dt>Wanneer gebruik ik een dubbelwand?</dt>
+          <dd>Een dubbelwand bestaat uit twee losstaande wandstijlen met een spouw ertussen. Dit wordt toegepast voor maximale geluidsisolatie (woningscheidende wanden) of als er installaties door de wand moeten lopen.</dd>
+
+          <dt>Hoeveel gipskartonplaten heb ik nodig per m²?</dt>
+          <dd>Een standaard gipskartonplaat van 1200×2600 mm dekt 3,12 m². Per 10 m² wandoppervlak heb je circa 3,2 platen nodig, inclusief snijverlies. De calculator houdt automatisch rekening met plaatranden en afmetingen.</dd>
+
+          <dt>Kan ik isolatie meenemen in de berekening?</dt>
+          <dd>Ja. Bij elk wandtype kun je aangeven of er isolatie nodig is en welke dikte (45 mm of 60 mm). De calculator telt het benodigde aantal m² isolatie op in het totaaloverzicht.</dd>
+        </dl>
+      </section>
+
+    </aside>
+
   </div>
 
   <site-footer></site-footer>

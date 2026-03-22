@@ -3,9 +3,45 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Afbouwr — Materiaalcalculatoren voor de afbouw</title>
-  <meta name="description" content="Gratis materiaalcalculatoren voor de afbouwsector. Bereken snel en correct hoeveel materiaal je nodig hebt voor systeemplafond, metalstud wand en meer." />
+  <title>Afbouwr — Gratis materiaalcalculatoren voor de afbouw</title>
+  <meta name="description" content="Gratis materiaalcalculatoren voor afbouwbedrijven. Bereken snel en correct hoeveel materiaal je nodig hebt voor systeemplafond, metalstud wand en meer. Geen account vereist." />
+  <link rel="canonical" href="https://www.afbouwr.nl/" />
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="website" />
+  <meta property="og:url"         content="https://www.afbouwr.nl/" />
+  <meta property="og:title"       content="Afbouwr — Gratis materiaalcalculatoren voor de afbouw" />
+  <meta property="og:description" content="Gratis materiaalcalculatoren voor afbouwbedrijven. Bereken snel en correct hoeveel materiaal je nodig hebt voor systeemplafond, metalstud wand en meer." />
+  <meta property="og:locale"      content="nl_NL" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary" />
+  <meta name="twitter:title"       content="Afbouwr — Gratis materiaalcalculatoren voor de afbouw" />
+  <meta name="twitter:description" content="Gratis materiaalcalculatoren voor afbouwbedrijven. Geen account, geen advertenties." />
+
   <link rel="stylesheet" href="style.css?v=3.3" />
+
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Afbouwr",
+    "url": "https://www.afbouwr.nl/",
+    "description": "Gratis materiaalcalculatoren voor afbouwbedrijven. Systeemplafond, metalstud wand en meer.",
+    "inLanguage": "nl-NL",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://www.afbouwr.nl/#tools"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Afbouwr",
+      "url": "https://www.afbouwr.nl/",
+      "email": "info@afbouwr.nl"
+    }
+  }
+  </script>
 </head>
 
 <body class="has-nav">
@@ -67,6 +103,21 @@
           </div>
         </a>
 
+        <a href="/metalstudplafondCalculator/" class="tool-card live anim-up-4">
+          <div class="tool-card-top">
+            <div class="tool-icon">⊞</div>
+            <span class="badge badge-live">Live</span>
+          </div>
+          <div>
+            <div class="tool-title">Metalstud Plafond</div>
+            <p class="tool-desc">Bereken CD-profielen, UD-randprofiel, draadhangers, gipskarton en schroeven voor zwevende of gekoppelde plafonds.</p>
+          </div>
+          <div class="tool-card-footer">
+            <span class="tool-meta">Zwevend · Gekoppeld</span>
+            <span class="tool-arrow">→</span>
+          </div>
+        </a>
+
       </div>
     </section>
 
@@ -79,14 +130,6 @@
 
       <div class="roadmap-list anim-up-1">
 
-        <div class="roadmap-item">
-          <div class="roadmap-icon">⊞</div>
-          <div class="roadmap-info">
-            <div class="roadmap-title">Metalstud Plafond</div>
-            <div class="roadmap-desc">Hoofdprofielen, draadhangers, veerprofiel, gipsplaten en schroeven — zwevend of gekoppeld.</div>
-          </div>
-          <span class="badge badge-soon">Binnenkort</span>
-        </div>
 
         <div class="roadmap-item">
           <div class="roadmap-icon">◻</div>
@@ -145,6 +188,7 @@
                 <option value="">— kies calculator —</option>
                 <option value="Systeemplafond">Systeemplafond</option>
                 <option value="Metalstud Wand">Metalstud Wand</option>
+                <option value="Metalstud Plafond">Metalstud Plafond</option>
                 <option value="Anders / Algemeen">Anders / Algemeen</option>
               </select>
             </div>

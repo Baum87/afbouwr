@@ -1,0 +1,56 @@
+{
+  "_info": "Afbouwr productcatalogus. Bewerk dit bestand om producten toe te voegen of te verwijderen. Velden: waarde (intern), label (weergave), link (optioneel affiliate-URL), vasteMaten (optioneel).",
+
+  "plafondplaten": [
+    {
+      "merk": "Knauf",
+      "link": "",
+      "typen": [
+        { "waarde": "Knauf Sahara",   "label": "Sahara",        "link": "" },
+        { "waarde": "Knauf Feria",    "label": "Feria",         "link": "" },
+        { "waarde": "Knauf Perla OP", "label": "Perla OP 0.95", "link": "" },
+        { "waarde": "Knauf Tatra",    "label": "Tatra",         "link": "" }
+      ]
+    },
+    {
+      "merk": "Rockfon",
+      "link": "",
+      "typen": [
+        { "waarde": "Rockfon Krios",     "label": "Krios",     "link": "" },
+        { "waarde": "Rockfon Lithos",    "label": "Lithos",    "link": "" },
+        { "waarde": "Rockfon Pallas",    "label": "Pallas",    "link": "" },
+        { "waarde": "Rockfon Black",     "label": "Black",     "link": "" },
+        { "waarde": "Rockfon Color-all", "label": "Color-all", "link": "" }
+      ]
+    },
+    {
+      "merk": "OWA",
+      "link": "",
+      "typen": [
+        { "waarde": "OWA Harmony",    "label": "Harmony",    "link": "" },
+        { "waarde": "OWA Sandila",    "label": "Sandila",    "link": "" },
+        { "waarde": "OWA Sternbild",  "label": "Sternbild",  "link": "" },
+        { "waarde": "OWA Sinfonia",   "label": "Sinfonia",   "link": "" },
+        { "waarde": "OWA Brillianto", "label": "Brillianto", "link": "" },
+        { "waarde": "OWA Cosmos",     "label": "Cosmos",     "link": "" }
+      ]
+    },
+    {
+      "merk": "Gipsvinyl",
+      "link": "",
+      "typen": [
+        { "waarde": "Gipsvinyl wit",   "label": "Gipsvinyl wit",   "link": "" },
+        { "waarde": "Gipsvinyl zwart", "label": "Gipsvinyl zwart", "link": "" }
+      ]
+    }
+  ],
+
+  "gipstypen": [
+    { "waarde": "standaard_ak",  "label": "Standaard AK",     "link": "", "vasteMaten": null },
+    { "waarde": "standaard_4ak", "label": "Standaard 4-AK",   "link": "", "vasteMaten": { "breedte": 1200, "lengte": 2400 } },
+    { "waarde": "hydro",         "label": "Hydro (groen)",     "link": "", "vasteMaten": null },
+    { "waarde": "ladura",        "label": "Ladura Standaard",  "link": "", "vasteMaten": null },
+    { "waarde": "novlam",        "label": "Novlam (roze)",     "link": "", "vasteMaten": null },
+    { "waarde": "osb",           "label": "OSB",               "link": "", "vasteMaten": { "breedte": 1250, "lengte": 2500 } }
+  ]
+}

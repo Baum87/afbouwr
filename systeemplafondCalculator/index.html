@@ -3,9 +3,61 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Systeemplafond Rekenmachine — Afbouwr</title>
-  <meta name="description" content="Bereken platen, hoofd- en tussenprofielen, hoeklijn en kantlat voor systeemplafonds. Ondersteunt 600×600 en 600×1200 systemen." />
+  <title>Systeemplafond Calculator — Materiaal berekenen | Afbouwr</title>
+  <meta name="description" content="Bereken gratis hoeveel plafondplaten, hoofd- en tussenprofielen, hoeklijn en kantlat je nodig hebt voor een systeemplafond. Ondersteunt 600×600 en 600×1200 systemen. Knauf, Rockfon, OWA." />
+  <link rel="canonical" href="https://www.afbouwr.nl/systeemplafondCalculator/" />
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="website" />
+  <meta property="og:url"         content="https://www.afbouwr.nl/systeemplafondCalculator/" />
+  <meta property="og:title"       content="Systeemplafond Calculator — Materiaal berekenen | Afbouwr" />
+  <meta property="og:description" content="Bereken gratis hoeveel plafondplaten, hoofd- en tussenprofielen, hoeklijn en kantlat je nodig hebt. Knauf, Rockfon, OWA — 600×600 en 600×1200." />
+  <meta property="og:locale"      content="nl_NL" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary" />
+  <meta name="twitter:title"       content="Systeemplafond Calculator | Afbouwr" />
+  <meta name="twitter:description" content="Gratis materiaalberekening voor systeemplafonds. Geen account vereist." />
+
   <link rel="stylesheet" href="../style.css?v=3.3" />
+
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Systeemplafond Calculator",
+    "url": "https://www.afbouwr.nl/systeemplafondCalculator/",
+    "description": "Gratis calculator voor systeemplafonds. Bereken plafondplaten, hoofd- en tussenprofielen, hoeklijn en kantlat voor 600×600 en 600×1200 systemen.",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "inLanguage": "nl-NL",
+    "isAccessibleForFree": true,
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "EUR"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Afbouwr",
+      "url": "https://www.afbouwr.nl/",
+      "email": "info@afbouwr.nl"
+    },
+    "featureList": [
+      "600×600 systeem berekening",
+      "600×1200 systeem berekening",
+      "Knauf plafondplaten",
+      "Rockfon plafondplaten",
+      "OWA plafondplaten",
+      "Hoofdprofielen berekening",
+      "Tussenprofielen berekening",
+      "Hoeklijn berekening",
+      "Kantlat berekening",
+      "Meerdere ruimtes per project"
+    ]
+  }
+  </script>
 </head>
 <body class="has-nav">
 
@@ -155,7 +207,7 @@
       <section class="results-section" id="results-section" style="display:none;">
 
         <!-- Ruimteoverzicht -->
-        <div class="table-card">
+        <div class="table-card overzicht-card">
           <div class="table-header">
             <h3>Ruimteoverzicht</h3>
             <span class="table-count" id="count-ruimtes">0 ruimtes</span>
@@ -199,7 +251,10 @@
         <div class="table-card totalen-card">
           <div class="table-header">
             <h3>Totaaloverzicht <span class="tag">per product</span></h3>
-            <button class="btn btn-outline btn-sm" id="btn-afdrukken">⎙ Afdrukken</button>
+            <div class="table-header-actions">
+              <button class="btn btn-outline btn-sm" id="btn-afdrukken">⎙ Afdrukken</button>
+              <button class="btn btn-outline btn-sm" id="btn-pdf">↓ PDF</button>
+            </div>
           </div>
           <div class="table-wrapper">
             <table>
@@ -241,6 +296,60 @@
       </section>
 
     </main>
+
+    <!-- ── INFO / SEO / FAQ ── -->
+    <aside class="info-sectie no-print" aria-label="Uitleg en veelgestelde vragen">
+
+      <section class="info-blok">
+        <h2>Hoe werkt de systeemplafond calculator?</h2>
+        <p>
+          Voer per ruimte de breedte, lengte en omtrek in. De calculator bepaalt automatisch
+          hoeveel plafondplaten, hoofdprofielen (H-profielen), tussenprofielen (T-1200 en T-600),
+          hoeklijn en kantlat je nodig hebt. Je kunt meerdere ruimtes toevoegen en het resultaat
+          per product afdrukken of exporteren.
+        </p>
+        <p>
+          Alle berekeningen houden rekening met het gekozen systeemtype: bij een
+          <strong>600×600 systeem</strong> liggen de T-600-profielen dwars op de T-1200-profielen.
+          Bij een <strong>600×1200 systeem</strong> vervallen de T-600-profielen volledig.
+          De omtrek bepaalt de hoeveelheid hoeklijn en kantlat.
+        </p>
+      </section>
+
+      <section class="info-blok">
+        <h2>Welke materialen berekent de tool?</h2>
+        <ul>
+          <li><strong>Plafondplaten</strong> — Knauf (Sahara, Feria, Perla OP, Tatra), Rockfon (Krios, Lithos, Pallas, Black, Color-all) en OWA (Harmony, Sandila, Sternbild, Sinfonia, Brillianto, Cosmos). Ook gipsvinyl wit en zwart.</li>
+          <li><strong>Hoofdprofielen (H-profiel)</strong> — de dragende profielen die op de draden of rails hangen, hart-op-hart 1200 mm.</li>
+          <li><strong>Tussenprofielen T-1200</strong> — koppelen de hoofdprofielen aan elkaar, hart-op-hart 600 mm.</li>
+          <li><strong>Tussenprofielen T-600</strong> — alleen bij 600×600 systeem, hart-op-hart 600 mm dwars.</li>
+          <li><strong>Hoeklijn</strong> — wandprofiel rondom de ruimte voor de afwerking aan de wand.</li>
+          <li><strong>Kantlat</strong> — alternatief voor hoeklijn, afhankelijk van de afwerking.</li>
+        </ul>
+      </section>
+
+      <section class="info-blok">
+        <h2>Veelgestelde vragen</h2>
+        <dl class="faq-lijst">
+          <dt>Hoeveel plafondplaten heb ik nodig voor 600×600?</dt>
+          <dd>Per m² heb je bij een 600×600 systeem 2,78 platen nodig (1 m² ÷ 0,36 m² per plaat). De calculator rondt altijd naar boven af en voegt een marge toe voor uitval en snijverlies.</dd>
+
+          <dt>Wat is het verschil tussen een 600×600 en 600×1200 systeem?</dt>
+          <dd>Bij een 600×1200 systeem zijn de platen twee keer zo groot (0,72 m²). Er zijn geen T-600 tussenprofielen nodig, wat de montage sneller maakt. Een 600×600 systeem geeft meer flexibiliteit bij onregelmatige ruimtes.</dd>
+
+          <dt>Hoe bereken ik de omtrek van een ruimte?</dt>
+          <dd>Tel de lengten van alle wanden bij elkaar op: (lengte + breedte) × 2. Voor een ruimte van 6 × 4 meter is de omtrek (6 + 4) × 2 = 20 meter. Voer dit in als randlengte.</dd>
+
+          <dt>Kan ik meerdere ruimtes in één project berekenen?</dt>
+          <dd>Ja. Voeg elke ruimte afzonderlijk toe. Het totaaloverzicht telt alle ruimtes automatisch op per producttype en merk.</dd>
+
+          <dt>Welke merken worden ondersteund?</dt>
+          <dd>Knauf, Rockfon en OWA — de meest gebruikte merken in de Nederlandse afbouwsector. Staat jouw merk er niet bij? Gebruik de knop "Handmatig toevoegen" om zelf materiaal in te voeren.</dd>
+        </dl>
+      </section>
+
+    </aside>
+
   </div>
 
   <site-footer></site-footer>

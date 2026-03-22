@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Account — Afbouwr</title>
+  <meta name="robots" content="noindex" />
+  <link rel="stylesheet" href="../style.css?v=3.3" />
+</head>
+<body class="has-nav">
+
+  <site-nav back="true"></site-nav>
+
+  <div class="hub-wrapper" style="max-width: 480px;">
+
+    <section class="hub-section">
+      <div class="hub-section-head">
+        <h1 class="hub-section-title" id="account-titel">Inloggen</h1>
+      </div>
+
+      <!-- Status berichten -->
+      <div id="account-status" class="account-status" style="display:none;"></div>
+
+      <!-- Ingelogd: toon profiel -->
+      <div id="view-profiel" style="display:none;">
+        <div class="card input-card">
+          <p class="account-email" id="account-email-display"></p>
+          <div class="card-actions">
+            <button class="btn btn-outline" id="btn-uitloggen">Uitloggen</button>
+          </div>
+        </div>
+        <p class="account-hint">Projecten die je opslaat worden gekoppeld aan dit account en zijn beschikbaar op al je apparaten.</p>
+      </div>
+
+      <!-- Niet ingelogd: login/registreer formulier -->
+      <div id="view-auth">
+        <div class="card input-card">
+
+          <div class="form-group">
+            <label for="auth-email">E-mailadres</label>
+            <input type="email" id="auth-email" placeholder="jouw@email.nl" autocomplete="email" />
+          </div>
+
+          <div class="form-group">
+            <label for="auth-wachtwoord">Wachtwoord</label>
+            <input type="password" id="auth-wachtwoord" placeholder="Minimaal 6 tekens" autocomplete="current-password" />
+          </div>
+
+          <div class="card-actions">
+            <button class="btn btn-primary" id="btn-inloggen">Inloggen</button>
+            <button class="btn btn-outline" id="btn-registreren">Nieuw account</button>
+          </div>
+
+        </div>
+
+        <p class="account-hint">
+          Geen account nodig om de calculatoren te gebruiken. Een account geeft je de mogelijkheid om projecten op te slaan en te openen op meerdere apparaten.
+        </p>
+      </div>
+
+    </section>
+
+  </div>
+
+  <site-footer></site-footer>
+
+  <!-- Supabase SDK (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="../supabase.js"></script>
+  <script src="../auth.js"></script>
+  <script src="../components.js?v=3.3"></script>
+
+  <script>
+  'use strict';
+
+  const elTitel        = document.getElementById('account-titel');
+  const elStatus       = document.getElementById('account-status');
+  const elEmail        = document.getElementById('auth-email');
+  const elWachtwoord   = document.getElementById('auth-wachtwoord');
+  const btnInloggen    = document.getElementById('btn-inloggen');
+  const btnRegistreren = document.getElementById('btn-registreren');
+  const btnUitloggen   = document.getElementById('btn-uitloggen');
+  const viewProfiel    = document.getElementById('view-profiel');
+  const viewAuth       = document.getElementById('view-auth');
+  const emailDisplay   = document.getElementById('account-email-display');
+
+  function toonStatus(bericht, type) {
+    elStatus.textContent  = bericht;
+    elStatus.className    = `account-status account-status-${type}`;
+    elStatus.style.display = 'block';
+    if (type === 'succes') setTimeout(() => { elStatus.style.display = 'none'; }, 4000);
+  }
+
+  function toonProfiel(gebruiker) {
+    elTitel.textContent          = 'Mijn account';
+    emailDisplay.textContent     = gebruiker.email || '';
+    viewProfiel.style.display    = 'block';
+    viewAuth.style.display       = 'none';
+  }
+
+  function toonLogin() {
+    elTitel.textContent       = 'Inloggen';
+    viewProfiel.style.display = 'none';
+    viewAuth.style.display    = 'block';
+  }
+
+  // Luister naar auth state
+  Auth.onAuthVerandering(gebruiker => {
+    if (gebruiker) toonProfiel(gebruiker);
+    else toonLogin();
+  });
+
+  // Inloggen
+  btnInloggen.addEventListener('click', async () => {
+    const email = elEmail.value.trim();
+    const ww    = elWachtwoord.value;
+    if (!email || !ww) { toonStatus('Vul e-mailadres en wachtwoord in.', 'fout'); return; }
+
+    btnInloggen.disabled = true;
+    btnInloggen.textContent = 'Even wachten…';
+    const { fout } = await Auth.inloggen(email, ww);
+    btnInloggen.disabled = false;
+    btnInloggen.textContent = 'Inloggen';
+
+    if (fout) toonStatus(fout, 'fout');
+    else toonStatus('Succesvol ingelogd.', 'succes');
+  });
+
+  // Registreren
+  btnRegistreren.addEventListener('click', async () => {
+    const email = elEmail.value.trim();
+    const ww    = elWachtwoord.value;
+    if (!email || !ww) { toonStatus('Vul e-mailadres en wachtwoord in.', 'fout'); return; }
+
+    btnRegistreren.disabled = true;
+    btnRegistreren.textContent = 'Even wachten…';
+    const { fout } = await Auth.registreren(email, ww);
+    btnRegistreren.disabled = false;
+    btnRegistreren.textContent = 'Nieuw account';
+
+    if (fout) toonStatus(fout, 'fout');
+    else toonStatus('Account aangemaakt. Controleer je e-mail om te bevestigen.', 'succes');
+  });
+
+  // Uitloggen
+  btnUitloggen.addEventListener('click', async () => {
+    await Auth.uitloggen();
+    toonStatus('Je bent uitgelogd.', 'succes');
+  });
+
+  // Enter in wachtwoord veld → inloggen
+  elWachtwoord.addEventListener('keydown', e => {
+    if (e.key === 'Enter') btnInloggen.click();
+  });
+  </script>
+
+</body>
+</html>

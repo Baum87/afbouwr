@@ -143,13 +143,10 @@ const WAND_TYPES = {
   },
 };
 
-// Afgeleid uit PRODUCTEN (products.js) — niet handmatig aanpassen
-const GIPS_LABELS = Object.fromEntries(
-  PRODUCTEN.gipstypen.map(g => [g.waarde, g.label])
-);
-const GIPS_VASTE_MATEN = Object.fromEntries(
-  PRODUCTEN.gipstypen.filter(g => g.vasteMaten).map(g => [g.waarde, g.vasteMaten])
-);
+// Afgeleid uit PRODUCTEN — worden gevuld in init() nadat products.json geladen is
+let GIPS_LABELS     = {};
+let GIPS_VASTE_MATEN = {};
+let GIPS_LINKS      = {};
 
 // ─── STATE ─────────────────────────────────────────────────────────────────
 let state = {
@@ -934,9 +931,9 @@ function renderTotalen() {
 
   // ── Materialen uit wanden ─────────────────────────────────────────────────
   const materialen = {};
-  function tel(categorie, omschrijving, eenheid, aantal) {
+  function tel(categorie, omschrijving, eenheid, aantal, link) {
     const key = `${categorie}||${omschrijving}||${eenheid}`;
-    if (!materialen[key]) materialen[key] = { categorie, omschrijving, eenheid, totaal: 0 };
+    if (!materialen[key]) materialen[key] = { categorie, omschrijving, eenheid, totaal: 0, link: link || null };
     materialen[key].totaal += aantal;
   }
 
@@ -944,7 +941,7 @@ function renderTotalen() {
     tel('U-profielen',  `U${w.profiel_breedte} — ${w.profiel_u_lengte}mm`, 'st', w.profiel_u_aantal);
     tel('C-profielen',  `C${w.profiel_breedte} — ${w.profiel_c_lengte}mm`, 'st', w.profiel_c_aantal);
     (w.gips_lagen || []).forEach(l => {
-      tel('Gipskarton', `${GIPS_LABELS[l.gips_type] || l.gips_type} ${l.lengte}×${l.breedte}mm`, 'st', l.aantal);
+      tel('Gipskarton', `${GIPS_LABELS[l.gips_type] || l.gips_type} ${l.lengte}×${l.breedte}mm`, 'st', l.aantal, GIPS_LINKS[l.gips_type]);
     });
     if (w.heeft_isolatie && w.iso_aantal > 0) {
       tel('Isolatie', `Isolatie ${w.isolatie_dikte}mm — ${ISOLATIE_LENGTE}×${ISOLATIE_BREEDTE}mm`, 'st', w.iso_aantal);
@@ -978,8 +975,11 @@ function renderTotalen() {
       huidigCategorie = r.categorie;
       row += `<tr class="totaal-categorie-header"><td colspan="4">${esc(r.categorie)}</td></tr>`;
     }
+    const naamCelW = r.link
+      ? `<a href="${esc(r.link)}" target="_blank" rel="noopener sponsored" class="affiliate-link">${esc(r.omschrijving)}</a>`
+      : esc(r.omschrijving);
     row += `<tr>
-      <td>${esc(r.omschrijving)}</td>
+      <td>${naamCelW}</td>
       <td class="num">${r.totaal}</td>
       <td>${esc(r.eenheid)}</td>
       <td></td>
@@ -1164,7 +1164,7 @@ function initEvents() {
   DOM.projectNaam().addEventListener('input', e => slaProjectOp(e.target.value));
   DOM.btnAllesReset().addEventListener('click', allesVerwijderen);
   DOM.btnHandmatigAdd().addEventListener('click', voegHandmatigToe);
-  document.getElementById('btn-afdrukken').addEventListener('click', () => window.print());
+  initAfdrukKnoppen();
 
   // Enter in handmatig invoer velden → toevoegen
   [DOM.extraOmschrijving, DOM.extraAantal, DOM.extraEenheid,
@@ -1185,10 +1185,15 @@ function initEvents() {
 
 // ─── INIT ───────────────────────────────────────────────────────────────────
 function init() {
+  // Vul afgeleide product-lookups op basis van geladen PRODUCTEN
+  GIPS_LABELS      = Object.fromEntries(PRODUCTEN.gipstypen.map(g => [g.waarde, g.label]));
+  GIPS_VASTE_MATEN = Object.fromEntries(PRODUCTEN.gipstypen.filter(g => g.vasteMaten).map(g => [g.waarde, g.vasteMaten]));
+  GIPS_LINKS       = Object.fromEntries(PRODUCTEN.gipstypen.filter(g => g.link).map(g => [g.waarde, g.link]));
+
   vulGipsTypeSelects();
   laadOpgeslagen();
   renderAlles();
   initEvents();
 }
 
-document.addEventListener('DOMContentLoaded', init);
+window.PRODUCTEN_READY.then(init);

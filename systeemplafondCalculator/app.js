@@ -69,6 +69,9 @@ const MATERIAAL_GROEP = {
   'Kantlat':            'Kantlatten',
 };
 
+// Lookup: productnaam (waarde) → affiliate-URL (gevuld in init)
+let PLAAT_LINKS = {};
+
 // ── State ──────────────────────────────────────────────────────────────────
 
 let gekozenSysteem  = null;   // '600x600' | '600x1200'
@@ -381,8 +384,14 @@ function renderTotaalTabel() {
       ? esc(item.merk)
       : '<span style="color:var(--ink-3)">\u2014</span>';
 
+    // Affiliate-link: koppel de materiaalnaam aan een URL als die bekend is
+    const affiliateUrl = item.materiaal === 'Plafondplaten' ? PLAAT_LINKS[item.merk] : null;
+    const naamCel = affiliateUrl
+      ? `<a href="${esc(affiliateUrl)}" target="_blank" rel="noopener sponsored" class="affiliate-link">${esc(item.materiaal)}</a>`
+      : esc(item.materiaal);
+
     html += `<tr>
-      <td>${esc(item.materiaal)}</td>
+      <td>${naamCel}</td>
       <td>${merkCel}</td>
       <td class="num">${esc(item.maat)}</td>
       <td>${kleurCel}</td>
@@ -557,6 +566,9 @@ function verwijderExtra(id) {
 function vulPlaatMerkSelect() {
   const sel = DOM.plaatMerk();
   sel.innerHTML = '<option value="">— niet opgegeven —</option>';
+
+  // Bouw affiliate-link lookup op
+  PLAAT_LINKS = {};
   PRODUCTEN.plafondplaten.forEach(groep => {
     const optgroup = document.createElement('optgroup');
     optgroup.label = groep.merk;
@@ -565,9 +577,11 @@ function vulPlaatMerkSelect() {
       opt.value = type.waarde;
       opt.textContent = type.label;
       optgroup.appendChild(opt);
+      if (type.link) PLAAT_LINKS[type.waarde] = type.link;
     });
     sel.appendChild(optgroup);
   });
+
   const overig = document.createElement('optgroup');
   overig.label = 'Overig';
   const anders = document.createElement('option');
@@ -577,7 +591,7 @@ function vulPlaatMerkSelect() {
   sel.appendChild(overig);
 }
 
-window.addEventListener('load', () => {
+window.PRODUCTEN_READY.then(() => {
 
   vulPlaatMerkSelect();
   laadOp();
@@ -702,8 +716,8 @@ window.addEventListener('load', () => {
   // Projectnaam opslaan
   DOM.projectNaam().addEventListener('input', slaOp);
 
-  // Afdrukken
-  document.getElementById('btn-afdrukken').addEventListener('click', () => window.print());
+  // Afdrukken + PDF (via gedeelde utility in components.js)
+  initAfdrukKnoppen();
 
   // Initiële statusmelding
   DOM.calcStatus().textContent = 'Kies een systeemtype om te beginnen';

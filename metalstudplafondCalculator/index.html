@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Metalstud Plafond Calculator — Materiaal berekenen | Afbouwr</title>
+  <meta name="description" content="Bereken gratis hoeveel CD-profielen, UD-randprofielen, draadhangers, gipskarton en schroeven je nodig hebt voor een metalstud plafond. Zwevend of gekoppeld systeem." />
+  <link rel="canonical" href="https://www.afbouwr.nl/metalstudplafondCalculator/" />
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="website" />
+  <meta property="og:url"         content="https://www.afbouwr.nl/metalstudplafondCalculator/" />
+  <meta property="og:title"       content="Metalstud Plafond Calculator — Materiaal berekenen | Afbouwr" />
+  <meta property="og:description" content="Bereken gratis hoeveel CD-profielen, UD-randprofielen, draadhangers en gipskarton je nodig hebt voor een metalstud plafond." />
+  <meta property="og:locale"      content="nl_NL" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary" />
+  <meta name="twitter:title"       content="Metalstud Plafond Calculator | Afbouwr" />
+  <meta name="twitter:description" content="Gratis materiaalberekening voor metalstud plafonds. Geen account vereist." />
+
+  <link rel="stylesheet" href="../style.css?v=3.3" />
+
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Metalstud Plafond Calculator",
+    "url": "https://www.afbouwr.nl/metalstudplafondCalculator/",
+    "description": "Gratis calculator voor metalstud plafonds. Bereken CD-profielen, UD-randprofielen, draadhangers, gipskarton en schroeven.",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "inLanguage": "nl-NL",
+    "isAccessibleForFree": true,
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Afbouwr",
+      "url": "https://www.afbouwr.nl/",
+      "email": "info@afbouwr.nl"
+    },
+    "featureList": [
+      "Zwevend plafond berekening",
+      "Gekoppeld plafond berekening",
+      "CD-profiel berekening",
+      "UD-randprofiel berekening",
+      "Draadhangers berekening",
+      "Gipskarton berekening",
+      "Schroeven berekening",
+      "Meerdere ruimtes per project"
+    ]
+  }
+  </script>
+</head>
+<body class="has-nav">
+
+  <site-nav back="true" label="Metalstud Plafond"></site-nav>
+
+  <div class="app-wrapper">
+
+    <!-- ── HEADER ── -->
+    <header class="app-header">
+      <div class="header-inner">
+        <div class="brand">
+          <span class="brand-icon">⊞</span>
+          <div class="brand-text">
+            <span class="brand-eyebrow">Materiaalcalculator</span>
+            <h1>Metalstud Plafond</h1>
+          </div>
+        </div>
+        <div class="header-rechts">
+          <div class="project-invoer">
+            <label for="project-naam">Projectnaam</label>
+            <input type="text" id="project-naam" placeholder="bijv. Verbouwing Kantoor A" autocomplete="off" />
+          </div>
+          <button class="btn btn-reset" id="btn-alles-reset">↺ Alles wissen</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="main-content">
+
+      <!-- ── INVOER ── -->
+      <section class="card input-card">
+        <h2 class="card-title">Ruimte invoer</h2>
+
+        <div class="form-grid">
+
+          <!-- Omschrijving -->
+          <div class="form-group form-group-span">
+            <label for="ruimte-naam">Omschrijving</label>
+            <input type="text" id="ruimte-naam" placeholder="bijv. Kantoor begane grond" autocomplete="off" />
+          </div>
+
+          <!-- Afmetingen -->
+          <div class="form-group">
+            <label for="ruimte-lengte">Lengte (m)</label>
+            <input type="number" id="ruimte-lengte" min="0.5" step="0.1" placeholder="bijv. 6" />
+          </div>
+
+          <div class="form-group">
+            <label for="ruimte-breedte">Breedte (m)</label>
+            <input type="number" id="ruimte-breedte" min="0.5" step="0.1" placeholder="bijv. 4" />
+          </div>
+
+          <!-- Systeemtype -->
+          <div class="form-group form-group-span">
+            <label>Systeemtype</label>
+            <div class="btn-group-compact">
+              <button class="btn active" data-systeem="zwevend" aria-pressed="true">Zwevend</button>
+              <button class="btn" data-systeem="gekoppeld" aria-pressed="false">Gekoppeld aan vloer boven</button>
+            </div>
+          </div>
+
+          <!-- Lagen gips -->
+          <div class="form-group form-group-span">
+            <label>Lagen gipskarton</label>
+            <div class="btn-group-compact">
+              <button class="btn active" data-lagen="1" aria-pressed="true">1 laag</button>
+              <button class="btn" data-lagen="2" aria-pressed="false">2 lagen</button>
+            </div>
+          </div>
+
+          <!-- Gipstype -->
+          <div class="form-group form-group-span">
+            <label for="gips-type">Type gipskarton</label>
+            <select id="gips-type">
+              <!-- ingevuld via products.js -->
+            </select>
+          </div>
+
+          <!-- Plaatmaat -->
+          <div class="form-group">
+            <label for="plaat-breedte">Plaatbreedte (mm)</label>
+            <input type="number" id="plaat-breedte" min="600" max="1500" step="50" value="1200" />
+          </div>
+
+          <div class="form-group">
+            <label for="plaat-lengte">Plaatlengte (mm)</label>
+            <input type="number" id="plaat-lengte" min="1200" max="3600" step="100" value="2600" />
+          </div>
+
+          <!-- Hart-op-hart CD -->
+          <div class="form-group form-group-span">
+            <label>Hart-op-hart CD-profiel</label>
+            <div class="btn-group-compact">
+              <button class="btn active" data-hoh="400" aria-pressed="true">400 mm</button>
+              <button class="btn" data-hoh="600" aria-pressed="false">600 mm</button>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="card-actions">
+          <button class="btn btn-primary" id="btn-toevoegen" disabled>+ Toevoegen aan lijst</button>
+          <span class="calc-status" id="calc-status" role="status" aria-live="polite" aria-atomic="true"></span>
+        </div>
+      </section>
+
+      <!-- ── RESULTATEN ── -->
+      <section class="results-section" id="results-section" style="display:none;">
+
+        <!-- Ruimteoverzicht -->
+        <div class="table-card overzicht-card">
+          <div class="table-header">
+            <h3>Ruimteoverzicht</h3>
+            <span class="table-count" id="count-ruimtes">0 ruimtes</span>
+          </div>
+          <div class="table-wrapper">
+            <table id="ruimtes-table">
+              <thead>
+                <tr>
+                  <th>Omschrijving</th>
+                  <th>Systeem</th>
+                  <th>Gipstype</th>
+                  <th>Lagen</th>
+                  <th>m²</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="ruimtes-tbody">
+                <tr class="empty-row"><td colspan="6">Nog geen ruimtes toegevoegd</td></tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td class="totaal-label" colspan="4">Totaal</td>
+                  <td class="totaal-val num" id="total-sqm">0</td>
+                  <td></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+
+        <!-- Totaaloverzicht -->
+        <div class="table-card totalen-card">
+          <div class="table-header">
+            <h3>Totaaloverzicht <span class="tag">per product</span></h3>
+            <div class="table-header-actions">
+              <button class="btn btn-outline btn-sm" id="btn-afdrukken">⎙ Afdrukken</button>
+              <button class="btn btn-outline btn-sm" id="btn-pdf">↓ PDF</button>
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Materiaal</th>
+                  <th>Maat / type</th>
+                  <th>Aantal</th>
+                  <th>Eenheid</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-totalen"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Handmatig materiaal toevoegen -->
+        <div class="table-card no-print">
+          <div class="table-header">
+            <h3>Handmatig materiaal toevoegen</h3>
+          </div>
+          <div class="handmatig-invoer">
+            <div class="handmatig-rij">
+              <div class="handmatig-label">Materiaal</div>
+              <input type="text"   id="extra-omschrijving" placeholder="Omschrijving" class="input-breed" />
+              <input type="number" id="extra-aantal"       placeholder="Aantal" min="0" step="1" />
+              <input type="text"   id="extra-eenheid"      placeholder="Eenheid" />
+            </div>
+            <div class="handmatig-actie">
+              <button class="btn btn-primary" id="btn-handmatig-add">+ Toevoegen</button>
+              <span class="handmatig-hint">Voeg extra materialen toe aan het totaaloverzicht</span>
+            </div>
+            <div id="handmatig-lijst" class="handmatig-lijst-mobiel"></div>
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- ── INFO / SEO / FAQ ── -->
+    <aside class="info-sectie no-print" aria-label="Uitleg en veelgestelde vragen">
+
+      <section class="info-blok">
+        <h2>Hoe werkt de metalstud plafond calculator?</h2>
+        <p>
+          Voer per ruimte de lengte en breedte in en kies het systeemtype. De calculator berekent
+          automatisch hoeveel CD-profielen, UD-randprofielen, draadhangers (bij zwevend systeem),
+          gipskartonplaten en schroeven je nodig hebt. Je kunt meerdere ruimtes aan één project toevoegen.
+        </p>
+        <p>
+          Bij een <strong>zwevend systeem</strong> hangen de CD-profielen op draadhangers die in de
+          bestaande constructie worden bevestigd. Bij een <strong>gekoppeld systeem</strong> worden
+          de CD-profielen direct aan de vloer boven gemonteerd via veerprofielen — er zijn dan geen
+          draadhangers nodig.
+        </p>
+      </section>
+
+      <section class="info-blok">
+        <h2>Welke materialen worden berekend?</h2>
+        <ul>
+          <li><strong>UD-randprofiel (30 mm)</strong> — randprofiel rondom de ruimte, lengte = omtrek.</li>
+          <li><strong>CD-hoofdprofielen (60 mm)</strong> — dragers hart-op-hart 400 of 600 mm, loodrecht op de draadhangers.</li>
+          <li><strong>CD-dwarsprofielen (60 mm)</strong> — koppelprofielen, hart-op-hart 600 mm, loodrecht op de hoofdprofielen.</li>
+          <li><strong>Draadhangers</strong> — alleen bij zwevend systeem. Hart-op-hart 1000 mm langs de hoofdprofielen.</li>
+          <li><strong>Veerprofiel / klemsysteem</strong> — bij gekoppeld systeem voor bevestiging aan vloer boven.</li>
+          <li><strong>Gipskartonplaten</strong> — standaard AK, hydro, Ladura, Novlam of OSB.</li>
+          <li><strong>Schroeven</strong> — TN-schroeven, berekend op gemiddeld 25 per plaat per laag.</li>
+        </ul>
+      </section>
+
+      <section class="info-blok">
+        <h2>Veelgestelde vragen</h2>
+        <dl class="faq-lijst">
+          <dt>Wanneer kies ik voor een zwevend plafond?</dt>
+          <dd>Een zwevend plafond gebruik je als je installatieruimte wilt creëren boven het plafond, of als de bestaande constructie te ongelijk is om direct aan te bevestigen. De CD-profielen hangen op verstelbare draadhangers.</dd>
+
+          <dt>Wat is het verschil tussen CD-hoofd- en dwarsprofielen?</dt>
+          <dd>Hoofdprofielen lopen in de lengte van de ruimte en dragen het gewicht. Dwarsprofielen worden haaks erop aangebracht op hart-op-hart 600 mm en vormen samen met de hoofdprofielen het raster waaraan het gipskarton wordt geschroefd.</dd>
+
+          <dt>Hoeveel draadhangers heb ik nodig?</dt>
+          <dd>Per hoofdprofiel worden draadhangers geplaatst op hart-op-hart 1000 mm. Voor een ruimte van 6 m breed met hoofdprofielen op 400 mm hart-op-hart zijn dat 15 rijen × (6 ÷ 1 + 1) = circa 105 draadhangers. De calculator berekent dit automatisch.</dd>
+
+          <dt>Kan ik 2 lagen gipskarton berekenen?</dt>
+          <dd>Ja. Kies bij "Lagen gipskarton" voor 2 lagen. De platen en schroeven worden dan verdubbeld berekend. Dit is gebruikelijk bij brandwerende plafonds (EI30/EI60) of voor betere geluidsdemping.</dd>
+
+          <dt>Welke hart-op-hart maat moet ik kiezen?</dt>
+          <dd>400 mm hart-op-hart geeft een steviger constructie en is verplicht bij 2 lagen gipskarton of bij grotere plaatformaten. 600 mm is voldoende voor standaard enkelvoudige plafonds met platen van 1200 mm breed.</dd>
+        </dl>
+      </section>
+
+    </aside>
+
+  </div>
+
+  <site-footer></site-footer>
+
+  <script src="../products.js?v=2"></script>
+  <script src="../components.js?v=3.3"></script>
+  <script src="app.js?v=1"></script>
+
+</body>
+</html>
