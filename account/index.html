@@ -35,14 +35,12 @@
           <input type="email" id="login-email" placeholder="jouw@email.nl" autocomplete="email" />
         </div>
         <div class="form-group">
-          <label for="login-wachtwoord">
-            Wachtwoord
-            <button type="button" class="reset-link" id="btn-wachtwoord-vergeten">Wachtwoord vergeten?</button>
-          </label>
+          <label for="login-wachtwoord">Wachtwoord</label>
           <input type="password" id="login-wachtwoord" placeholder="Jouw wachtwoord" autocomplete="current-password" />
         </div>
         <div class="card-actions">
           <button class="btn btn-primary" id="btn-inloggen">Inloggen</button>
+          <button type="button" class="ww-vergeten-link" id="btn-wachtwoord-vergeten">Wachtwoord vergeten?</button>
         </div>
       </div>
 
@@ -378,14 +376,20 @@
     const btn = document.getElementById('btn-reset-verzenden');
     btn.disabled = true; btn.textContent = 'Even wachten…';
 
-    const { fout } = await Auth.wachtwoordReset(email);
+    let fout = null;
+    try {
+      const resultaat = await Auth.wachtwoordReset(email);
+      fout = resultaat.fout;
+    } catch (e) {
+      fout = 'Er is een onbekende fout opgetreden. Probeer het opnieuw.';
+    }
 
     btn.disabled = false; btn.textContent = 'Stuur resetlink';
     if (fout) {
       toonStatus(fout, 'fout');
     } else {
-      toonStatus('E-mail verstuurd. Controleer je inbox en klik op de link om je wachtwoord opnieuw in te stellen.', 'succes');
-      setTimeout(() => toonView(viewAuth), 6000);
+      toonStatus('Controleer je inbox. Als dit e-mailadres bij ons bekend is, ontvang je een resetlink.', 'succes');
+      setTimeout(() => toonView(viewAuth), 7000);
     }
   });
 

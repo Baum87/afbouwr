@@ -62,10 +62,14 @@ const Auth = (() => {
   async function wachtwoordReset(email) {
     const sb = client();
     if (!sb) return { fout: 'Supabase niet beschikbaar.' };
-    const { error } = await sb.auth.resetPasswordForEmail(email, {
-      redirectTo: 'https://www.afbouwr.nl/account/',
-    });
-    return { fout: error ? vertaalFout(error.message) : null };
+    try {
+      const { error } = await sb.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + '/account/',
+      });
+      return { fout: error ? vertaalFout(error.message) : null };
+    } catch (e) {
+      return { fout: 'Verbindingsfout. Controleer je internetverbinding en probeer opnieuw.' };
+    }
   }
 
   // ── Uitloggen ────────────────────────────────────────────────────────────────
