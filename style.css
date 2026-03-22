@@ -1380,6 +1380,7 @@ hr { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
 /* Account wrapper (restricts width on large screens) */
 .account-wrapper {
   max-width: 560px;
+  padding-top: clamp(2rem, 6vw, 4rem);
 }
 
 /* Auth tabs (Inloggen / Registreren) */
@@ -1454,7 +1455,11 @@ hr { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
   grid-template-columns: 1fr 1fr;
   gap: 16px;
 }
-@media (max-width: 480px) {
+.form-grid-2col input,
+.form-grid-2col select {
+  min-width: 0;
+}
+@media (max-width: 420px) {
   .form-grid-2col { grid-template-columns: 1fr; }
 }
 

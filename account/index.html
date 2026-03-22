@@ -248,7 +248,7 @@
     document.getElementById('profiel-naam-display').textContent  = volledigeNaam;
     document.getElementById('profiel-email-display').textContent = meta.email || '';
     document.getElementById('profiel-avatar').textContent        = voornaam ? voornaam[0].toUpperCase() : (meta.email?.[0] || '?').toUpperCase();
-    document.getElementById('profiel-titel').textContent         = voornaam ? `Hoi, ${voornaam}` : 'Mijn account';
+    document.getElementById('profiel-titel').textContent         = voornaam ? `Welkom, ${voornaam}` : 'Mijn account';
 
     const bedrijfEl = document.getElementById('profiel-bedrijf-display');
     if (meta.bedrijf) {

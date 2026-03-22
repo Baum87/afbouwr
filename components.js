@@ -70,7 +70,7 @@ class SiteNav extends HTMLElement {
       const btn = document.getElementById('nav-account-btn');
       if (!btn) return;
 
-      btn.textContent = voornaam ? `Hoi, ${voornaam}` : 'Mijn account';
+      btn.textContent = voornaam ? `Welkom, ${voornaam}` : 'Mijn account';
       btn.classList.add('ingelogd');
     });
 
@@ -81,7 +81,7 @@ class SiteNav extends HTMLElement {
 
       if (user) {
         const voornaam = user.user_metadata?.voornaam || '';
-        btn.textContent = voornaam ? `Hoi, ${voornaam}` : 'Mijn account';
+        btn.textContent = voornaam ? `Welkom, ${voornaam}` : 'Mijn account';
         btn.classList.add('ingelogd');
       } else {
         btn.textContent = 'Account';
