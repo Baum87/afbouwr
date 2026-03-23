@@ -479,9 +479,11 @@ body.has-nav { padding-top: 56px; }
 }
 
 /* Spacing tussen form-groups in de account-kaart */
+/*
 .card .form-group + .form-group {
   margin-top: 16px;
 }
+*/
 
 /* Invoer-rij: omschrijving + methode + maten op één rij */
 .invoer-rij {
