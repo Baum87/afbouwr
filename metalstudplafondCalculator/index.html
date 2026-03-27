@@ -4,22 +4,22 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Metalstud Plafond Calculator — Materiaal berekenen | Afbouwr</title>
-  <meta name="description" content="Bereken gratis hoeveel CD-profielen, UD-randprofielen, draadhangers, gipskarton en schroeven je nodig hebt voor een metalstud plafond. Zwevend of gekoppeld systeem." />
+  <meta name="description" content="Bereken gratis hoeveel CD-profielen, randprofielen, afhangers, kruisverbinders, gipskarton en schroeven je nodig hebt voor een metalstud plafond. Enkel of dubbel profielsysteem." />
   <link rel="canonical" href="https://www.afbouwr.nl/metalstudplafondCalculator/" />
 
   <!-- Open Graph -->
   <meta property="og:type"        content="website" />
   <meta property="og:url"         content="https://www.afbouwr.nl/metalstudplafondCalculator/" />
   <meta property="og:title"       content="Metalstud Plafond Calculator — Materiaal berekenen | Afbouwr" />
-  <meta property="og:description" content="Bereken gratis hoeveel CD-profielen, UD-randprofielen, draadhangers en gipskarton je nodig hebt voor een metalstud plafond." />
+  <meta property="og:description" content="Bereken gratis hoeveel CD-profielen, randprofielen, afhangers en gipskarton je nodig hebt voor een metalstud plafond." />
   <meta property="og:locale"      content="nl_NL" />
 
   <!-- Twitter Card -->
   <meta name="twitter:card"        content="summary" />
   <meta name="twitter:title"       content="Metalstud Plafond Calculator | Afbouwr" />
-  <meta name="twitter:description" content="Gratis materiaalberekening voor metalstud plafonds. Geen account vereist." />
+  <meta name="twitter:description" content="Gratis materiaalberekening voor metalstud plafonds. Enkel of dubbel profielsysteem." />
 
-  <link rel="stylesheet" href="../style.css?v=3.3" />
+  <link rel="stylesheet" href="../style.css?v=3.5" />
 
   <!-- JSON-LD Structured Data -->
   <script type="application/ld+json">
@@ -28,7 +28,7 @@
     "@type": "WebApplication",
     "name": "Metalstud Plafond Calculator",
     "url": "https://www.afbouwr.nl/metalstudplafondCalculator/",
-    "description": "Gratis calculator voor metalstud plafonds. Bereken CD-profielen, UD-randprofielen, draadhangers, gipskarton en schroeven.",
+    "description": "Gratis calculator voor metalstud plafonds. Bereken CD-profielen, randprofielen, afhangers, kruisverbinders, gipskarton en schroeven voor enkel of dubbel profielsysteem.",
     "applicationCategory": "BusinessApplication",
     "operatingSystem": "Web",
     "inLanguage": "nl-NL",
@@ -41,12 +41,14 @@
       "email": "info@afbouwr.nl"
     },
     "featureList": [
-      "Zwevend plafond berekening",
-      "Gekoppeld plafond berekening",
+      "Enkel profielsysteem berekening",
+      "Dubbel profielsysteem berekening",
       "CD-profiel berekening",
-      "UD-randprofiel berekening",
-      "Draadhangers berekening",
+      "Randprofiel berekening",
+      "Draadhanger / afhanger berekening",
+      "Kruisverbinder berekening",
       "Gipskarton berekening",
+      "Isolatie berekening",
       "Schroeven berekening",
       "Meerdere ruimtes per project"
     ]
@@ -108,8 +110,8 @@
           <div class="form-group form-group-span">
             <label>Systeemtype</label>
             <div class="btn-group-compact">
-              <button class="btn active" data-systeem="zwevend" aria-pressed="true">Zwevend</button>
-              <button class="btn" data-systeem="gekoppeld" aria-pressed="false">Gekoppeld aan vloer boven</button>
+              <button class="btn active" data-systeem="enkel" aria-pressed="true">Enkel profiel <small>(plaatdragend)</small></button>
+              <button class="btn" data-systeem="dubbel" aria-pressed="false">Dubbel profiel <small>(plaatdragend + basisprofiel)</small></button>
             </div>
           </div>
 
@@ -122,32 +124,84 @@
             </div>
           </div>
 
-          <!-- Gipstype -->
-          <div class="form-group form-group-span">
-            <label for="gips-type">Type gipskarton</label>
-            <select id="gips-type">
+          <!-- Gipstype laag 1 -->
+          <div class="form-group">
+            <label for="gips-type-1">Type gipskarton — 1e laag</label>
+            <select id="gips-type-1">
               <!-- ingevuld via products.js -->
             </select>
           </div>
 
-          <!-- Plaatmaat -->
+          <!-- Gipstype laag 2 (alleen bij 2 lagen) -->
+          <div class="form-group" id="gips-type-2-groep" style="display:none;">
+            <label for="gips-type-2">Type gipskarton — 2e laag</label>
+            <select id="gips-type-2">
+              <!-- ingevuld via products.js -->
+            </select>
+          </div>
+
+          <!-- Gipslengte + Gipsbreedte -->
           <div class="form-group">
-            <label for="plaat-breedte">Plaatbreedte (mm)</label>
-            <input type="number" id="plaat-breedte" min="600" max="1500" step="50" value="1200" />
+            <label for="gips-lengte">Gipslengte (mm)</label>
+            <select id="gips-lengte">
+              <option value="2400">2400 mm</option>
+              <option value="2500">2500 mm (osb)</option>
+              <option value="2600" selected>2600 mm</option>
+              <option value="2800">2800 mm</option>
+              <option value="3000">3000 mm</option>
+              <option value="3200">3200 mm</option>
+              <option value="3600">3600 mm</option>
+            </select>
           </div>
 
           <div class="form-group">
-            <label for="plaat-lengte">Plaatlengte (mm)</label>
-            <input type="number" id="plaat-lengte" min="1200" max="3600" step="100" value="2600" />
+            <label for="gips-breedte">Gipsbreedte (mm)</label>
+            <select id="gips-breedte">
+              <option value="1200" selected>1200 mm</option>
+              <option value="600">600 mm</option>
+            </select>
           </div>
 
-          <!-- Hart-op-hart CD -->
+          <!-- HoH profielen -->
+          <div class="form-group">
+            <label for="hoh-profielen">HoH profielen (mm)</label>
+            <input type="number" id="hoh-profielen" value="400" min="100" max="1000" step="25" />
+          </div>
+
+          <!-- HoH afhangers -->
+          <div class="form-group">
+            <label for="hoh-afhangers">
+              HoH afhangers (mm)
+              <span class="info-icon" title="0,3 kN/m² → hoh 1000 mm  |  0,5 kN/m² → hoh 750 mm">ⓘ</span>
+            </label>
+            <input type="number" id="hoh-afhangers" value="1000" min="300" max="2000" step="25" />
+          </div>
+
+          <!-- HoH plaatdragend systeem (alleen bij dubbel) -->
+          <div class="form-group" id="hoh-plaatdragend-groep" style="display:none;">
+            <label for="hoh-plaatdragend">
+              HoH plaatdragend systeem (mm)
+              <span class="info-icon" title="0,3 kN/m² → hoh 750 mm  |  0,5 kN/m² → hoh 600 mm">ⓘ</span>
+            </label>
+            <input type="number" id="hoh-plaatdragend" value="600" min="100" max="1000" step="25" />
+          </div>
+
+          <!-- Isolatie toggle -->
           <div class="form-group form-group-span">
-            <label>Hart-op-hart CD-profiel</label>
+            <label>Isolatie</label>
             <div class="btn-group-compact">
-              <button class="btn active" data-hoh="400" aria-pressed="true">400 mm</button>
-              <button class="btn" data-hoh="600" aria-pressed="false">600 mm</button>
+              <button class="btn active" data-isolatie="nee" aria-pressed="true">Geen isolatie</button>
+              <button class="btn" data-isolatie="ja" aria-pressed="false">Met isolatie</button>
             </div>
+          </div>
+
+          <!-- Isolatiedikte (alleen bij met isolatie) -->
+          <div class="form-group" id="isolatie-dikte-groep" style="display:none;">
+            <label for="isolatie-dikte">Isolatiedikte (mm)</label>
+            <select id="isolatie-dikte">
+              <option value="45">45 mm</option>
+              <option value="60">60 mm</option>
+            </select>
           </div>
 
         </div>
@@ -173,18 +227,17 @@
                 <tr>
                   <th>Omschrijving</th>
                   <th>Systeem</th>
-                  <th>Gipstype</th>
                   <th>Lagen</th>
                   <th>m²</th>
                   <th></th>
                 </tr>
               </thead>
               <tbody id="ruimtes-tbody">
-                <tr class="empty-row"><td colspan="6">Nog geen ruimtes toegevoegd</td></tr>
+                <tr class="empty-row"><td colspan="5">Nog geen ruimtes toegevoegd</td></tr>
               </tbody>
               <tfoot>
                 <tr>
-                  <td class="totaal-label" colspan="4">Totaal</td>
+                  <td class="totaal-label" colspan="3">Totaal</td>
                   <td class="totaal-val num" id="total-sqm">0</td>
                   <td></td>
                 </tr>
@@ -248,47 +301,50 @@
         <h2>Hoe werkt de metalstud plafond calculator?</h2>
         <p>
           Voer per ruimte de lengte en breedte in en kies het systeemtype. De calculator berekent
-          automatisch hoeveel CD-profielen, UD-randprofielen, draadhangers (bij zwevend systeem),
-          gipskartonplaten en schroeven je nodig hebt. Je kunt meerdere ruimtes aan één project toevoegen.
+          automatisch hoeveel randprofielen, CD-profielen, afhangers, gipskartonplaten, schroeven
+          en eventueel isolatie en kruisverbinders je nodig hebt. Je kunt meerdere ruimtes aan één
+          project toevoegen.
         </p>
         <p>
-          Bij een <strong>zwevend systeem</strong> hangen de CD-profielen op draadhangers die in de
-          bestaande constructie worden bevestigd. Bij een <strong>gekoppeld systeem</strong> worden
-          de CD-profielen direct aan de vloer boven gemonteerd via veerprofielen — er zijn dan geen
-          draadhangers nodig.
+          Bij een <strong>enkel profielsysteem</strong> draagt één laag CD-profielen direct het
+          gipskarton. Afhangers worden op de plaatdragende profielen geplaatst. Bij een
+          <strong>dubbel profielsysteem</strong> zijn er basisprofielen (aan de constructie) en
+          plaatdragende profielen (aan de basisprofielen gekoppeld via kruisverbinders).
         </p>
       </section>
 
       <section class="info-blok">
         <h2>Welke materialen worden berekend?</h2>
         <ul>
-          <li><strong>UD-randprofiel (30 mm)</strong> — randprofiel rondom de ruimte, lengte = omtrek.</li>
-          <li><strong>CD-hoofdprofielen (60 mm)</strong> — dragers hart-op-hart 400 of 600 mm, loodrecht op de draadhangers.</li>
-          <li><strong>CD-dwarsprofielen (60 mm)</strong> — koppelprofielen, hart-op-hart 600 mm, loodrecht op de hoofdprofielen.</li>
-          <li><strong>Draadhangers</strong> — alleen bij zwevend systeem. Hart-op-hart 1000 mm langs de hoofdprofielen.</li>
-          <li><strong>Veerprofiel / klemsysteem</strong> — bij gekoppeld systeem voor bevestiging aan vloer boven.</li>
-          <li><strong>Gipskartonplaten</strong> — standaard AK, hydro, Ladura, Novlam of OSB.</li>
-          <li><strong>Schroeven</strong> — TN-schroeven, berekend op gemiddeld 25 per plaat per laag.</li>
+          <li><strong>Randprofiel (3000 mm)</strong> — rondom de ruimte, lengte = omtrek.</li>
+          <li><strong>CD-profiel plaatdragend (3600 mm)</strong> — draagt het gipskarton, hoh invoerbaar.</li>
+          <li><strong>CD-profiel basisprofiel (3600 mm)</strong> — alleen bij dubbel systeem, hangt aan de constructie.</li>
+          <li><strong>Afhangers</strong> — hoh invoerbaar (standaard 1000 mm). Bij enkel systeem op plaatdragende profielen, bij dubbel op basisprofielen.</li>
+          <li><strong>Kruisverbinders</strong> — alleen bij dubbel systeem. Koppelen basisprofiel en plaatdragend profiel.</li>
+          <li><strong>Verbindingstukken</strong> — nodig als ruimtebreedte of -lengte groter is dan 3600 mm (profiellengte).</li>
+          <li><strong>Gipskartonplaten</strong> — standaard AK, hydro, Ladura, Novlam of OSB. Bij 2 lagen apart type per laag.</li>
+          <li><strong>Schroeven</strong> — 1e laag hoh 750 mm (lengte), 2e laag hoh 250 mm (lengte). Breedte afhankelijk van hoh profielen.</li>
+          <li><strong>Isolatie</strong> — optioneel, 45 of 60 mm dikte, platen 1350×600 mm.</li>
         </ul>
       </section>
 
       <section class="info-blok">
         <h2>Veelgestelde vragen</h2>
         <dl class="faq-lijst">
-          <dt>Wanneer kies ik voor een zwevend plafond?</dt>
-          <dd>Een zwevend plafond gebruik je als je installatieruimte wilt creëren boven het plafond, of als de bestaande constructie te ongelijk is om direct aan te bevestigen. De CD-profielen hangen op verstelbare draadhangers.</dd>
+          <dt>Wanneer kies ik voor een dubbel profielsysteem?</dt>
+          <dd>Een dubbel systeem gebruik je bij zwaardere plafonds (2 lagen gips), grotere overspanningen of wanneer meer geluidsisolatie gewenst is. Basisprofielen lopen in één richting en plaatdragende profielen worden haaks erop gekoppeld via kruisverbinders.</dd>
 
-          <dt>Wat is het verschil tussen CD-hoofd- en dwarsprofielen?</dt>
-          <dd>Hoofdprofielen lopen in de lengte van de ruimte en dragen het gewicht. Dwarsprofielen worden haaks erop aangebracht op hart-op-hart 600 mm en vormen samen met de hoofdprofielen het raster waaraan het gipskarton wordt geschroefd.</dd>
+          <dt>Wat is de aanbevolen hoh-afstand voor afhangers?</dt>
+          <dd>Bij een belasting van 0,3 kN/m² is hoh 1000 mm voldoende. Bij 0,5 kN/m² (bijv. 2 lagen gips) gebruik je hoh 750 mm. De calculator berekent het aantal afhangers op basis van de ingevoerde waarde.</dd>
 
-          <dt>Hoeveel draadhangers heb ik nodig?</dt>
-          <dd>Per hoofdprofiel worden draadhangers geplaatst op hart-op-hart 1000 mm. Voor een ruimte van 6 m breed met hoofdprofielen op 400 mm hart-op-hart zijn dat 15 rijen × (6 ÷ 1 + 1) = circa 105 draadhangers. De calculator berekent dit automatisch.</dd>
+          <dt>Wanneer zijn kruisverbinders nodig?</dt>
+          <dd>Kruisverbinders zijn alleen nodig bij een dubbel profielsysteem. Ze koppelen het basisprofiel aan het plaatdragende profiel op elke kruising.</dd>
+
+          <dt>Wanneer heb ik verbindingstukken nodig?</dt>
+          <dd>Als de ruimtebreedte of -lengte groter is dan de profiellengte (3600 mm), zijn verbindingstukken nodig om profielen aan elkaar te koppelen.</dd>
 
           <dt>Kan ik 2 lagen gipskarton berekenen?</dt>
-          <dd>Ja. Kies bij "Lagen gipskarton" voor 2 lagen. De platen en schroeven worden dan verdubbeld berekend. Dit is gebruikelijk bij brandwerende plafonds (EI30/EI60) of voor betere geluidsdemping.</dd>
-
-          <dt>Welke hart-op-hart maat moet ik kiezen?</dt>
-          <dd>400 mm hart-op-hart geeft een steviger constructie en is verplicht bij 2 lagen gipskarton of bij grotere plaatformaten. 600 mm is voldoende voor standaard enkelvoudige plafonds met platen van 1200 mm breed.</dd>
+          <dd>Ja. Kies "2 lagen" en je kunt per laag een apart gipstype kiezen. Schroeven worden apart berekend: laag 1 hoh 750 mm, laag 2 hoh 250 mm in de lengterichting.</dd>
         </dl>
       </section>
 
@@ -299,8 +355,8 @@
   <site-footer></site-footer>
 
   <script src="../products.js?v=2"></script>
-  <script src="../components.js?v=3.3"></script>
-  <script src="app.js?v=1"></script>
+  <script src="../components.js?v=3.5"></script>
+  <script src="app.js?v=2"></script>
 
 </body>
 </html>

@@ -328,6 +328,16 @@ body.has-nav { padding-top: 56px; }
   text-transform: uppercase; letter-spacing: .4px;
 }
 
+.info-icon {
+  display: inline-block;
+  font-size: 11px;
+  color: var(--ink-3, #aaa);
+  cursor: help;
+  text-transform: none;
+  letter-spacing: 0;
+  vertical-align: middle;
+}
+
 /* Uniforme input */
 .form-group input,
 .form-group select,
