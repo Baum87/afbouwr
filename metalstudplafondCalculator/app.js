@@ -2,52 +2,48 @@
 
 // ─── CONSTANTEN ──────────────────────────────────────────────────────────────
 
-const STORAGE_KEY = 'afbouwr_msplafond_v1';
-
-// Schroeven per plaat per laag (gemiddelde inclusief randverdichting)
-const SCHROEVEN_PER_PLAAT = 25;
-
-// UD-profiel standaardlengte in mm
-const UD_LENGTE = 3000;
-
-// CD-profiel standaardlengte in mm
-const CD_LENGTE = 3600;
-
-// Draadhangers hart-op-hart in mm (langs de hoofdprofielen)
-const DRAADHANGER_HOH = 1000;
-
-// Veerprofielen per m² hoofdprofiel (gekoppeld systeem)
-const VEERPROFIEL_PER_M = 1.5; // per strekkende meter hoofdprofiel
+const STORAGE_KEY       = 'afbouwr_msplafond_v2';
+const RANDPROFIEL_LEN   = 3000;  // mm
+const PROFIEL_LEN       = 3600;  // mm
+const ISOLATIE_OPP      = (1350 / 1000) * (600 / 1000); // 0.81 m²
 
 // ─── STAAT ───────────────────────────────────────────────────────────────────
 
-let ruimtes       = [];
-let extraMaterialen = [];
-let gekozenSysteem = 'zwevend';
-let gekozenLagen   = 1;
-let gekozenHoh     = 400;
+let ruimtes          = [];
+let extraMaterialen  = [];
+let gekozenSysteem   = 'enkel';  // 'enkel' | 'dubbel'
+let gekozenLagen     = 1;        // 1 | 2
+let gekozenIsolatie  = false;
 
 // ─── DOM ─────────────────────────────────────────────────────────────────────
 
 const DOM = {
-  projectNaam:      () => document.getElementById('project-naam'),
-  ruimteNaam:       () => document.getElementById('ruimte-naam'),
-  ruimteLengte:     () => document.getElementById('ruimte-lengte'),
-  ruimteBreedte:    () => document.getElementById('ruimte-breedte'),
-  gipsType:         () => document.getElementById('gips-type'),
-  plaatBreedte:     () => document.getElementById('plaat-breedte'),
-  plaatLengte:      () => document.getElementById('plaat-lengte'),
-  btnToevoegen:     () => document.getElementById('btn-toevoegen'),
-  calcStatus:       () => document.getElementById('calc-status'),
-  resultsSection:   () => document.getElementById('results-section'),
-  countRuimtes:     () => document.getElementById('count-ruimtes'),
-  ruimtesTbody:     () => document.getElementById('ruimtes-tbody'),
-  totalSqm:         () => document.getElementById('total-sqm'),
-  tbodyTotalen:     () => document.getElementById('tbody-totalen'),
-  extraOmschrijving: () => document.getElementById('extra-omschrijving'),
-  extraAantal:      () => document.getElementById('extra-aantal'),
-  extraEenheid:     () => document.getElementById('extra-eenheid'),
-  btnAllesReset:    () => document.getElementById('btn-alles-reset'),
+  projectNaam:           () => document.getElementById('project-naam'),
+  ruimteNaam:            () => document.getElementById('ruimte-naam'),
+  ruimteLengte:          () => document.getElementById('ruimte-lengte'),
+  ruimteBreedte:         () => document.getElementById('ruimte-breedte'),
+  gipsType1:             () => document.getElementById('gips-type-1'),
+  gipsType2:             () => document.getElementById('gips-type-2'),
+  gipsType2Groep:        () => document.getElementById('gips-type-2-groep'),
+  gipsLengte:            () => document.getElementById('gips-lengte'),
+  gipsBreedte:           () => document.getElementById('gips-breedte'),
+  hohProfielen:          () => document.getElementById('hoh-profielen'),
+  hohAfhangers:          () => document.getElementById('hoh-afhangers'),
+  hohPlaatdragend:       () => document.getElementById('hoh-plaatdragend'),
+  hohPlaatdragendGroep:  () => document.getElementById('hoh-plaatdragend-groep'),
+  isolatieDikte:         () => document.getElementById('isolatie-dikte'),
+  isolatieDikteGroep:    () => document.getElementById('isolatie-dikte-groep'),
+  btnToevoegen:          () => document.getElementById('btn-toevoegen'),
+  calcStatus:            () => document.getElementById('calc-status'),
+  resultsSection:        () => document.getElementById('results-section'),
+  countRuimtes:          () => document.getElementById('count-ruimtes'),
+  ruimtesTbody:          () => document.getElementById('ruimtes-tbody'),
+  totalSqm:              () => document.getElementById('total-sqm'),
+  tbodyTotalen:          () => document.getElementById('tbody-totalen'),
+  extraOmschrijving:     () => document.getElementById('extra-omschrijving'),
+  extraAantal:           () => document.getElementById('extra-aantal'),
+  extraEenheid:          () => document.getElementById('extra-eenheid'),
+  btnAllesReset:         () => document.getElementById('btn-alles-reset'),
 };
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
@@ -63,81 +59,174 @@ function esc(s) {
 
 function ceil(n) { return Math.ceil(n); }
 
-function getLengte()  { return parseFloat(DOM.ruimteLengte().value)  || 0; }
-function getBreedte() { return parseFloat(DOM.ruimteBreedte().value) || 0; }
-function getSqm()     { return +(getLengte() * getBreedte()).toFixed(2); }
-function getOmtrek()  { return +((getLengte() + getBreedte()) * 2).toFixed(2); }
+function getLengte()          { return parseFloat(DOM.ruimteLengte().value)     || 0; }
+function getBreedte()         { return parseFloat(DOM.ruimteBreedte().value)    || 0; }
+function getHohProfielen()    { return parseInt(DOM.hohProfielen().value)        || 400; }
+function getHohAfhangers()    { return parseInt(DOM.hohAfhangers().value)        || 1000; }
+function getHohPlaatdragend() { return parseInt(DOM.hohPlaatdragend().value)     || 600; }
+function getGipsLengte()      { return parseInt(DOM.gipsLengte().value)          || 2600; }
+function getGipsBreedte()     { return parseInt(DOM.gipsBreedte().value)         || 1200; }
+function getIsolatieDikte()   { return parseInt(DOM.isolatieDikte().value)       || 45; }
+
+/**
+ * Geeft de werkelijke plaatmaten terug voor een gipstype.
+ * Types met vasteMaten (bijv. standaard_4ak, osb) overschrijven de dropdown-waarden.
+ */
+function resolveGipsMaten(gipsType, gipsLengte, gipsBreedte) {
+  const g = (PRODUCTEN.gipstypen || []).find(t => t.waarde === gipsType);
+  if (g?.vasteMaten) {
+    return { lengte: g.vasteMaten.lengte, breedte: g.vasteMaten.breedte };
+  }
+  return { lengte: gipsLengte, breedte: gipsBreedte };
+}
 
 // ─── BEREKENING ──────────────────────────────────────────────────────────────
 
 /**
- * Bereken materialen voor één ruimte.
- * @param {number} lengte   - in meter
- * @param {number} breedte  - in meter
- * @param {number} hoh      - hart-op-hart CD-profiel in mm (400 of 600)
- * @param {number} lagen    - aantal gipslagen (1 of 2)
- * @param {string} systeem  - 'zwevend' of 'gekoppeld'
- * @param {number} plaatB   - plaatbreedte in mm
- * @param {number} plaatL   - plaatlengte in mm
+ * Berekent alle materialenhoeveelheden voor één ruimte.
+ *
+ * @param {{
+ *   lengte: number,         meter
+ *   breedte: number,        meter
+ *   systeem: string,        'enkel' | 'dubbel'
+ *   lagen: number,          1 | 2
+ *   gipsType1: string,
+ *   gipsType2: string,
+ *   gipsLengte: number,     mm
+ *   gipsBreedte: number,    mm
+ *   hohProfielen: number,   mm — bij enkel: hoh plaatdragend; bij dubbel: hoh basisprofiel
+ *   hohAfhangers: number,   mm — hoh afhangers langs het dragende profiel
+ *   hohPlaatdragend: number mm — alleen bij dubbel: hoh plaatdragend systeem
+ *   isolatie: boolean,
+ *   isolatieDikte: number   mm
+ * }} inp
  */
-function bereken(lengte, breedte, hoh, lagen, systeem, plaatB, plaatL) {
-  const sqm    = lengte * breedte;
-  const omtrek = (lengte + breedte) * 2;
+function bereken(inp) {
+  const {
+    lengte, breedte, systeem, lagen,
+    gipsType1, gipsType2, gipsLengte, gipsBreedte,
+    hohProfielen, hohAfhangers, hohPlaatdragend,
+    isolatie, isolatieDikte,
+  } = inp;
 
-  // ── UD-randprofiel (3000 mm staven) ──────────────────────────────────────
-  const udTotal_mm  = omtrek * 1000;
-  const udStaven    = ceil(udTotal_mm / UD_LENGTE);
+  const sqm      = lengte * breedte;
+  const omtrek   = (lengte + breedte) * 2;
+  const L        = lengte  * 1000; // mm
+  const B        = breedte * 1000; // mm
 
-  // ── CD-hoofdprofielen (lopen over de breedte, h-o-h in lengterichinng) ──
-  // Aantal rijen hoofdprofielen:
-  const aantalHoofdRijen = ceil((lengte * 1000) / hoh) + 1;
-  // Lengte per rij ≈ breedte van de ruimte; we rekenen in staven van 3600 mm
-  const cdHoofdPerRij   = ceil((breedte * 1000) / CD_LENGTE);
-  const cdHoofdTotaal   = aantalHoofdRijen * cdHoofdPerRij;
+  // ── Randprofiel (3000 mm) ─────────────────────────────────────────────────
+  const randprofiel_staven = ceil(omtrek * 1000 / RANDPROFIEL_LEN);
 
-  // ── CD-dwarsprofielen (h-o-h 600 mm, loodrecht op hoofdprofielen) ────────
-  const aantalDwarsRijen = ceil((breedte * 1000) / 600) + 1;
-  const cdDwarsPerRij    = ceil((lengte * 1000) / CD_LENGTE);
-  const cdDwarsTotaal    = aantalDwarsRijen * cdDwarsPerRij;
+  // ── Gipskarton ────────────────────────────────────────────────────────────
+  const maten1     = resolveGipsMaten(gipsType1, gipsLengte, gipsBreedte);
+  const plaatOpp1  = (maten1.breedte / 1000) * (maten1.lengte / 1000);
+  const platen1    = ceil(sqm * 1.1 / plaatOpp1);
 
-  // ── Draadhangers (zwevend systeem: h-o-h 1000 mm langs de hoofdprofielen)
-  let draadhangers = 0;
-  if (systeem === 'zwevend') {
-    // Per rij hoofdprofiel: aantal draadhangers = ceil(breedte / 1m) + 1
-    const dhangerPerRij = ceil((breedte * 1000) / DRAADHANGER_HOH) + 1;
-    draadhangers = aantalHoofdRijen * dhangerPerRij;
+  let platen2 = 0;
+  let maten2  = maten1;
+  if (lagen === 2) {
+    maten2 = resolveGipsMaten(gipsType2 || gipsType1, gipsLengte, gipsBreedte);
+    const plaatOpp2 = (maten2.breedte / 1000) * (maten2.lengte / 1000);
+    platen2 = ceil(sqm * 1.1 / plaatOpp2);
   }
-
-  // ── Veerprofielen (gekoppeld systeem) ─────────────────────────────────────
-  let veerprofielen = 0;
-  if (systeem === 'gekoppeld') {
-    // 1 veerprofiel per strekkende meter hoofdprofiel (afgerond)
-    const totalHoofdMeter = aantalHoofdRijen * breedte;
-    veerprofielen = ceil(totalHoofdMeter * VEERPROFIEL_PER_M);
-  }
-
-  // ── Gipskartonplaten ──────────────────────────────────────────────────────
-  const plaatOpp  = (plaatB / 1000) * (plaatL / 1000); // m²
-  const plaatMaat = `${plaatL}×${plaatB} mm`;
-  // Snijverlies: 10%
-  const plaatBruto = sqm * 1.10;
-  const platen     = ceil(plaatBruto / plaatOpp) * lagen;
 
   // ── Schroeven ─────────────────────────────────────────────────────────────
-  const plaatPerLaag = ceil(plaatBruto / plaatOpp);
-  const schroeven    = plaatPerLaag * SCHROEVEN_PER_PLAAT * lagen;
+  // In de breedte richting van de gipsplaat wordt geschroefd op het dragende profiel.
+  // Voor enkel: dat is het plaatdragend profiel (hohProfielen).
+  // Voor dubbel: dat is ook het plaatdragend profiel (hohPlaatdragend).
+  const hohGips = systeem === 'enkel' ? hohProfielen : hohPlaatdragend;
+
+  // Laag 1: hoh 750 mm in de lengterichting van de gipsplaat
+  const rijen_l1   = ceil(maten1.lengte / 750);
+  const rijen_b1   = ceil(maten1.breedte / hohGips);
+  const schroeven1 = rijen_l1 * rijen_b1 * platen1;
+
+  // Laag 2: hoh 250 mm in de lengterichting
+  let schroeven2 = 0;
+  if (lagen === 2) {
+    const rijen_l2 = ceil(maten2.lengte / 250);
+    const rijen_b2 = ceil(maten2.breedte / hohGips);
+    schroeven2 = rijen_l2 * rijen_b2 * platen2;
+  }
+
+  // ── Profielen & bevestiging ───────────────────────────────────────────────
+  let cdPlaatdragend  = 0;
+  let cdBasisprofiel  = 0;
+  let afhangers       = 0;
+  let kruisverbinders = 0;
+  let verbindingstukken = 0;
+
+  if (systeem === 'enkel') {
+    // Plaatdragende profielen lopen over de breedte (B),
+    // gepositioneerd langs de lengte (L) met hoh = hohProfielen.
+    const aantalRijen   = ceil(L / hohProfielen) + 1;
+    const stavenPerRij  = ceil(B / PROFIEL_LEN);
+    cdPlaatdragend      = aantalRijen * stavenPerRij;
+
+    // Verbindingstukken: nodig als breedte > 3600 mm
+    if (B > PROFIEL_LEN) {
+      verbindingstukken = (ceil(B / PROFIEL_LEN) - 1) * aantalRijen;
+    }
+
+    // Afhangers langs elk plaatdragend profiel (langs B)
+    const afhangerPerRij = ceil(B / hohAfhangers) + 1;
+    afhangers = aantalRijen * afhangerPerRij;
+
+  } else {
+    // DUBBEL SYSTEEM
+    //
+    // Basisprofielen lopen over de breedte (B),
+    // gepositioneerd langs de lengte (L) met start 300 mm, dan hoh = hohProfielen.
+    const aantalBasis   = Math.max(1, Math.floor((L - 300) / hohProfielen) + 1);
+    const stavenBasis   = ceil(B / PROFIEL_LEN);
+    cdBasisprofiel      = aantalBasis * stavenBasis;
+
+    // Verbindingstukken basisprofielen (breedte > 3600 mm)
+    if (B > PROFIEL_LEN) {
+      verbindingstukken += (ceil(B / PROFIEL_LEN) - 1) * aantalBasis;
+    }
+
+    // Plaatdragende profielen lopen over de lengte (L),
+    // gepositioneerd langs de breedte (B) met hoh = hohPlaatdragend.
+    const aantalPD      = ceil(B / hohPlaatdragend) + 1;
+    const stavenPD      = ceil(L / PROFIEL_LEN);
+    cdPlaatdragend      = aantalPD * stavenPD;
+
+    // Verbindingstukken plaatdragende profielen (lengte > 3600 mm)
+    if (L > PROFIEL_LEN) {
+      verbindingstukken += (ceil(L / PROFIEL_LEN) - 1) * aantalPD;
+    }
+
+    // Afhangers langs elk basisprofiel (langs B)
+    const afhangerPerBasis = ceil(B / hohAfhangers) + 1;
+    afhangers = aantalBasis * afhangerPerBasis;
+
+    // Kruisverbinders: formule per specificatie
+    // = (L - 300) / hoh_basis  ×  (B - hoh_pd) / hoh_pd
+    const k = (L - 300) / hohProfielen * (B - hohPlaatdragend) / hohPlaatdragend;
+    kruisverbinders = Math.max(0, ceil(k));
+  }
+
+  // ── Isolatie ─────────────────────────────────────────────────────────────
+  const iso_aantal = isolatie ? ceil(sqm / ISOLATIE_OPP) : 0;
 
   return {
-    sqm:           +sqm.toFixed(2),
-    omtrek:        +omtrek.toFixed(2),
-    udStaven,
-    cdHoofdTotaal,
-    cdDwarsTotaal,
-    draadhangers,
-    veerprofielen,
-    platen,
-    plaatMaat,
-    schroeven,
+    sqm:               +sqm.toFixed(2),
+    omtrek:            +omtrek.toFixed(2),
+    randprofiel_staven,
+    cdPlaatdragend,
+    cdBasisprofiel,
+    afhangers,
+    kruisverbinders,
+    verbindingstukken,
+    platen1,
+    platen2,
+    maten1,
+    maten2,
+    schroeven1,
+    schroeven2,
+    iso_aantal,
+    isolatieDikte,
   };
 }
 
@@ -157,9 +246,9 @@ function laadOp() {
   try {
     const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
     if (!data) return;
-    if (data.projectNaam) DOM.projectNaam().value = data.projectNaam;
-    if (Array.isArray(data.ruimtes))          ruimtes          = data.ruimtes;
-    if (Array.isArray(data.extraMaterialen))  extraMaterialen  = data.extraMaterialen;
+    if (data.projectNaam)                    DOM.projectNaam().value = data.projectNaam;
+    if (Array.isArray(data.ruimtes))         ruimtes         = data.ruimtes;
+    if (Array.isArray(data.extraMaterialen)) extraMaterialen = data.extraMaterialen;
   } catch (_) {}
 }
 
@@ -175,7 +264,7 @@ function renderTabel() {
   countEl.textContent = `${ruimtes.length} ruimte${ruimtes.length !== 1 ? 's' : ''}`;
 
   if (ruimtes.length === 0) {
-    tbody.innerHTML = '<tr class="empty-row"><td colspan="6">Nog geen ruimtes toegevoegd</td></tr>';
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="5">Nog geen ruimtes toegevoegd</td></tr>';
     totSqmEl.textContent = '0';
     DOM.tbodyTotalen().innerHTML = '';
     return;
@@ -185,10 +274,10 @@ function renderTabel() {
   let rows = '';
   for (const r of ruimtes) {
     totSqm += r.resultaten.sqm;
+    const systeemLabel = r.systeem === 'enkel' ? 'Enkel' : 'Dubbel';
     rows += `<tr>
       <td>${esc(r.naam)}</td>
-      <td>${r.systeem === 'zwevend' ? 'Zwevend' : 'Gekoppeld'}</td>
-      <td>${esc(r.gipsLabel)} ${r.lagen > 1 ? `(${r.lagen}×)` : ''}</td>
+      <td>${systeemLabel}</td>
       <td class="num">${r.lagen}</td>
       <td class="num">${r.resultaten.sqm}</td>
       <td><button class="btn-delete-room" data-action="verwijder" data-id="${r.id}" aria-label="${esc(r.naam)} verwijderen">✕</button></td>
@@ -203,60 +292,100 @@ function renderTabel() {
 function renderTotaalTabel() {
   const totaalEl = DOM.tbodyTotalen();
 
-  // Accumuleer totalen over alle ruimtes
-  let udStaven      = 0;
-  let cdHoofd       = 0;
-  let cdDwars       = 0;
-  let draadhangers  = 0;
-  let veerprofielen = 0;
-  let platen        = 0;
-  let schroeven     = 0;
+  let udStaven         = 0;
+  let cdPlaatdragend   = 0;
+  let cdBasisprofiel   = 0;
+  let afhangers        = 0;
+  let kruisverbinders  = 0;
+  let verbindingstukken = 0;
+  let schroeven1       = 0;
+  let schroeven2       = 0;
+  let iso_aantal       = 0;
 
-  // Bijhouden gipstype-combinaties (voor label in totaal)
-  const gipsTypes = new Set();
-  const plaatMaten = new Set();
+  // Gipskarton gegroepeerd per type + maat
+  const gipsMap = new Map(); // key → { label, maten, platen }
+
+  let heeftDubbel  = false;
+  let heeftIsolatie = false;
+  const isolatieDiktes = new Set();
 
   for (const r of ruimtes) {
     const res = r.resultaten;
-    udStaven      += res.udStaven;
-    cdHoofd       += res.cdHoofdTotaal;
-    cdDwars       += res.cdDwarsTotaal;
-    draadhangers  += res.draadhangers;
-    veerprofielen += res.veerprofielen;
-    platen        += res.platen;
-    schroeven     += res.schroeven;
-    gipsTypes.add(r.gipsLabel);
-    plaatMaten.add(res.plaatMaat);
-  }
+    udStaven          += res.randprofiel_staven;
+    cdPlaatdragend    += res.cdPlaatdragend;
+    cdBasisprofiel    += res.cdBasisprofiel;
+    afhangers         += res.afhangers;
+    kruisverbinders   += res.kruisverbinders;
+    verbindingstukken += res.verbindingstukken;
+    schroeven1        += res.schroeven1;
+    schroeven2        += res.schroeven2;
 
-  const gipsLabel  = [...gipsTypes].join(', ') || '—';
-  const plaatLabel = [...plaatMaten].join(', ') || '—';
+    if (r.systeem === 'dubbel') heeftDubbel = true;
+
+    // Laag 1
+    const key1 = `${r.gipsType1}|${res.maten1.lengte}|${res.maten1.breedte}`;
+    if (!gipsMap.has(key1)) gipsMap.set(key1, { label: r.gipsLabel1, maten: res.maten1, platen: 0 });
+    gipsMap.get(key1).platen += res.platen1;
+
+    // Laag 2
+    if (r.lagen === 2) {
+      const key2 = `${r.gipsType2}|${res.maten2.lengte}|${res.maten2.breedte}`;
+      if (!gipsMap.has(key2)) gipsMap.set(key2, { label: r.gipsLabel2, maten: res.maten2, platen: 0 });
+      gipsMap.get(key2).platen += res.platen2;
+    }
+
+    if (res.iso_aantal > 0) {
+      heeftIsolatie = true;
+      iso_aantal += res.iso_aantal;
+      isolatieDiktes.add(res.isolatieDikte);
+    }
+  }
 
   let html = '';
 
-  // Groep: Randprofielen
+  // Randprofiel
   html += groepHeader('Randprofiel');
-  html += rij('UD-randprofiel', '30 mm / 3000 mm', udStaven, 'staven');
+  html += rij('Randprofiel', '30 mm / 3000 mm', udStaven, 'staven');
 
-  // Groep: CD-profielen
-  html += groepHeader('CD-profielen');
-  html += rij('CD-hoofdprofiel', '60 mm / 3600 mm', cdHoofd, 'staven');
-  html += rij('CD-dwarsprofiel', '60 mm / 3600 mm', cdDwars, 'staven');
+  // Profielen
+  html += groepHeader('Profielen');
+  if (cdBasisprofiel > 0) {
+    html += rij('CD-profiel — basisprofiel', '3600 mm', cdBasisprofiel, 'staven');
+  }
+  html += rij('CD-profiel — plaatdragend', '3600 mm', cdPlaatdragend, 'staven');
 
-  // Groep: Bevestiging
-  if (draadhangers > 0 || veerprofielen > 0) {
-    html += groepHeader('Bevestiging');
-    if (draadhangers > 0)  html += rij('Draadhangers',  'Zwevend systeem', draadhangers,  'st');
-    if (veerprofielen > 0) html += rij('Veerprofielen', 'Gekoppeld systeem', veerprofielen, 'st');
+  // Verbindingstukken
+  if (verbindingstukken > 0) {
+    html += groepHeader('Verbindingstukken');
+    html += rij('Verbindingstuk CD-profiel', '—', verbindingstukken, 'st');
   }
 
-  // Groep: Gipskarton
-  html += groepHeader('Gipskarton');
-  html += rij(`Gipskartonplaat — ${gipsLabel}`, plaatLabel, platen, 'platen');
+  // Bevestiging
+  html += groepHeader('Bevestiging');
+  const afhangerLabel = heeftDubbel ? 'Draadhanger / afhanger (op basisprofiel)' : 'Draadhanger / afhanger';
+  html += rij(afhangerLabel, '—', afhangers, 'st');
+  if (kruisverbinders > 0) {
+    html += rij('Kruisverbinder', '—', kruisverbinders, 'st');
+  }
 
-  // Groep: Schroeven
-  html += groepHeader('Bevestigingsmateriaal');
-  html += rij('TN-schroeven', '35 mm', schroeven, 'st');
+  // Gipskarton
+  html += groepHeader('Gipskarton');
+  for (const [, { label, maten, platen }] of gipsMap) {
+    const maatStr = `${maten.lengte}×${maten.breedte} mm`;
+    html += rij(`Gipskartonplaat — ${esc(label)}`, maatStr, platen, 'platen');
+  }
+
+  // Isolatie
+  if (heeftIsolatie) {
+    html += groepHeader('Isolatie');
+    const dikteStr = [...isolatieDiktes].sort((a, b) => a - b).join(' / ') + ' mm';
+    html += rij(`Isolatie — ${dikteStr}`, '1350×600 mm', iso_aantal, 'platen');
+  }
+
+  // Schroeven
+  html += groepHeader('Schroeven');
+  if (schroeven1 > 0) html += rij('TN-schroef — 1e laag (hoh 750 mm)', '25 mm', schroeven1, 'st');
+  if (schroeven2 > 0) html += rij('TN-schroef — 2e laag (hoh 250 mm)', '35 mm', schroeven2, 'st');
 
   // Handmatig toegevoegd
   if (extraMaterialen.length > 0) {
@@ -306,12 +435,35 @@ function voegToe() {
   const breedte = getBreedte();
   if (lengte <= 0 || breedte <= 0) return;
 
-  const naam      = DOM.ruimteNaam().value.trim() || `Ruimte ${ruimtes.length + 1}`;
-  const gipsEl    = DOM.gipsType();
-  const gipsWaarde = gipsEl.value;
-  const gipsLabel  = gipsEl.options[gipsEl.selectedIndex]?.text || gipsWaarde;
-  const plaatB    = parseInt(DOM.plaatBreedte().value) || 1200;
-  const plaatL    = parseInt(DOM.plaatLengte().value)  || 2600;
+  const naam = DOM.ruimteNaam().value.trim() || `Ruimte ${ruimtes.length + 1}`;
+
+  const gipsEl1   = DOM.gipsType1();
+  const gipsType1 = gipsEl1.value;
+  const gipsLabel1 = gipsEl1.options[gipsEl1.selectedIndex]?.text || gipsType1;
+
+  let gipsType2  = gipsType1;
+  let gipsLabel2 = gipsLabel1;
+  if (gekozenLagen === 2) {
+    const gipsEl2 = DOM.gipsType2();
+    gipsType2  = gipsEl2.value;
+    gipsLabel2 = gipsEl2.options[gipsEl2.selectedIndex]?.text || gipsType2;
+  }
+
+  const inp = {
+    lengte,
+    breedte,
+    systeem:         gekozenSysteem,
+    lagen:           gekozenLagen,
+    gipsType1,
+    gipsType2,
+    gipsLengte:      getGipsLengte(),
+    gipsBreedte:     getGipsBreedte(),
+    hohProfielen:    getHohProfielen(),
+    hohAfhangers:    getHohAfhangers(),
+    hohPlaatdragend: getHohPlaatdragend(),
+    isolatie:        gekozenIsolatie,
+    isolatieDikte:   getIsolatieDikte(),
+  };
 
   ruimtes.push({
     id:         Date.now(),
@@ -320,10 +472,11 @@ function voegToe() {
     breedte,
     systeem:    gekozenSysteem,
     lagen:      gekozenLagen,
-    hoh:        gekozenHoh,
-    gipsWaarde,
-    gipsLabel,
-    resultaten: bereken(lengte, breedte, gekozenHoh, gekozenLagen, gekozenSysteem, plaatB, plaatL),
+    gipsType1,
+    gipsType2,
+    gipsLabel1,
+    gipsLabel2,
+    resultaten: bereken(inp),
   });
 
   slaOp();
@@ -358,7 +511,7 @@ function verwijderExtra(id) {
   renderTotaalTabel();
 }
 
-// ─── INVOER VALIDATIE / STATUS ────────────────────────────────────────────────
+// ─── STATUS / VALIDATIE ───────────────────────────────────────────────────────
 
 function updateStatus() {
   const lengte  = getLengte();
@@ -367,8 +520,9 @@ function updateStatus() {
   const status  = DOM.calcStatus();
 
   if (lengte > 0 && breedte > 0) {
-    const sqm = (lengte * breedte).toFixed(2);
-    status.textContent = `${sqm} m² — ${gekozenSysteem}, ${gekozenLagen} laag/lagen, h-o-h ${gekozenHoh} mm`;
+    const sqm        = (lengte * breedte).toFixed(2);
+    const systeemStr = gekozenSysteem === 'enkel' ? 'Enkel' : 'Dubbel';
+    status.textContent = `${sqm} m² — ${systeemStr} systeem, ${gekozenLagen} laag/lagen`;
     btn.disabled = false;
   } else {
     status.textContent = lengte <= 0 && breedte <= 0
@@ -379,8 +533,8 @@ function updateStatus() {
 }
 
 function resetInvoer() {
-  DOM.ruimteNaam().value = '';
-  DOM.ruimteLengte().value = '';
+  DOM.ruimteNaam().value    = '';
+  DOM.ruimteLengte().value  = '';
   DOM.ruimteBreedte().value = '';
   DOM.ruimteLengte().focus();
   updateStatus();
@@ -389,7 +543,7 @@ function resetInvoer() {
 function resetAlles() {
   if (ruimtes.length === 0 && extraMaterialen.length === 0) return;
   if (!confirm('Weet je zeker dat je alles wilt wissen?')) return;
-  ruimtes = [];
+  ruimtes         = [];
   extraMaterialen = [];
   DOM.projectNaam().value = '';
   slaOp();
@@ -397,24 +551,32 @@ function resetAlles() {
   resetInvoer();
 }
 
-// ─── GIPSTYPE DROPDOWN ────────────────────────────────────────────────────────
+// ─── UI: TOON/VERBERG ──────────────────────────────────────────────────────
 
-function vulGipsTypeSelect() {
-  const sel = DOM.gipsType();
-  sel.innerHTML = PRODUCTEN.gipstypen.map(g => {
+function updateSysteemUI() {
+  const isDubbel = gekozenSysteem === 'dubbel';
+  DOM.hohPlaatdragendGroep().style.display = isDubbel ? '' : 'none';
+}
+
+function updateLagenUI() {
+  const is2Lagen = gekozenLagen === 2;
+  DOM.gipsType2Groep().style.display = is2Lagen ? '' : 'none';
+}
+
+function updateIsolatieUI() {
+  DOM.isolatieDikteGroep().style.display = gekozenIsolatie ? '' : 'none';
+}
+
+// ─── GIPSTYPE DROPDOWNS ───────────────────────────────────────────────────────
+
+function vulGipsTypeSelects() {
+  const opties = (PRODUCTEN.gipstypen || []).map(g => {
     const maat = g.vasteMaten ? ` (${g.vasteMaten.lengte}×${g.vasteMaten.breedte})` : '';
     return `<option value="${g.waarde}">${g.label}${maat}</option>`;
   }).join('');
 
-  // Vaste maten: update plaatafmetingen als een type met vaste maten gekozen wordt
-  sel.addEventListener('change', () => {
-    const gevonden = PRODUCTEN.gipstypen.find(g => g.waarde === sel.value);
-    if (gevonden?.vasteMaten) {
-      DOM.plaatBreedte().value = gevonden.vasteMaten.breedte;
-      DOM.plaatLengte().value  = gevonden.vasteMaten.lengte;
-    }
-    updateStatus();
-  });
+  DOM.gipsType1().innerHTML = opties;
+  DOM.gipsType2().innerHTML = opties;
 }
 
 // ─── EVENTS ──────────────────────────────────────────────────────────────────
@@ -428,6 +590,7 @@ function initEvents() {
         b.classList.remove('active'); b.setAttribute('aria-pressed', 'false');
       });
       btn.classList.add('active'); btn.setAttribute('aria-pressed', 'true');
+      updateSysteemUI();
       updateStatus();
     });
   });
@@ -440,33 +603,40 @@ function initEvents() {
         b.classList.remove('active'); b.setAttribute('aria-pressed', 'false');
       });
       btn.classList.add('active'); btn.setAttribute('aria-pressed', 'true');
+      updateLagenUI();
       updateStatus();
     });
   });
 
-  // Hart-op-hart knoppen
-  document.querySelectorAll('[data-hoh]').forEach(btn => {
+  // Isolatieknoppen
+  document.querySelectorAll('[data-isolatie]').forEach(btn => {
     btn.addEventListener('click', () => {
-      gekozenHoh = parseInt(btn.dataset.hoh);
-      document.querySelectorAll('[data-hoh]').forEach(b => {
+      gekozenIsolatie = btn.dataset.isolatie === 'ja';
+      document.querySelectorAll('[data-isolatie]').forEach(b => {
         b.classList.remove('active'); b.setAttribute('aria-pressed', 'false');
       });
       btn.classList.add('active'); btn.setAttribute('aria-pressed', 'true');
+      updateIsolatieUI();
       updateStatus();
     });
   });
 
   // Invoervelden
-  [DOM.ruimteLengte(), DOM.ruimteBreedte(), DOM.plaatBreedte(), DOM.plaatLengte()].forEach(el => {
-    el.addEventListener('input', updateStatus);
-  });
+  [
+    DOM.ruimteLengte(), DOM.ruimteBreedte(),
+    DOM.hohProfielen(), DOM.hohAfhangers(), DOM.hohPlaatdragend(),
+    DOM.gipsLengte(), DOM.gipsBreedte(),
+  ].forEach(el => el.addEventListener('input', updateStatus));
 
-  // Enter in naam-veld
+  DOM.gipsType1().addEventListener('change', updateStatus);
+  DOM.gipsType2().addEventListener('change', updateStatus);
+
+  // Enter in naam → lengte
   DOM.ruimteNaam().addEventListener('keydown', e => {
     if (e.key === 'Enter') DOM.ruimteLengte().focus();
   });
 
-  // Enter in invoervelden → toevoegen
+  // Enter in afmetingsvelden → toevoegen
   [DOM.ruimteLengte(), DOM.ruimteBreedte()].forEach(el => {
     el.addEventListener('keydown', e => {
       if (e.key === 'Enter' && !DOM.btnToevoegen().disabled) voegToe();
@@ -482,17 +652,16 @@ function initEvents() {
   // Projectnaam opslaan
   DOM.projectNaam().addEventListener('input', slaOp);
 
-  // Afdrukken + PDF (via gedeelde utility in components.js)
+  // Afdrukken + PDF
   initAfdrukKnoppen();
 
   // Handmatig toevoegen
-  DOM.btnHandmatigAdd = () => document.getElementById('btn-handmatig-add');
   document.getElementById('btn-handmatig-add').addEventListener('click', voegHandmatigToe);
   [DOM.extraOmschrijving(), DOM.extraAantal(), DOM.extraEenheid()].forEach(el => {
     el.addEventListener('keydown', e => { if (e.key === 'Enter') voegHandmatigToe(); });
   });
 
-  // Delegated events: verwijder ruimte / extra materiaal
+  // Delegated: verwijder ruimte / extra
   document.addEventListener('click', e => {
     const btn = e.target.closest('[data-action]');
     if (!btn) return;
@@ -507,8 +676,11 @@ function initEvents() {
 // ─── INIT ────────────────────────────────────────────────────────────────────
 
 function init() {
-  vulGipsTypeSelect();
+  vulGipsTypeSelects();
   laadOp();
+  updateSysteemUI();
+  updateLagenUI();
+  updateIsolatieUI();
   renderTabel();
   initEvents();
 }
