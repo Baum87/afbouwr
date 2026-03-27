@@ -133,9 +133,9 @@
           <div class="form-group">
             <label for="gips-lengte">Gipslengte (mm)</label>
             <select id="gips-lengte">
-              <option value="2400">2400 mm</option>
+              <option value="2400" selected>2400 mm</option>
               <option value="2500">2500 mm (osb)</option>
-              <option value="2600" selected>2600 mm</option>
+              <option value="2600">2600 mm</option>
               <option value="2800">2800 mm</option>
               <option value="3000">3000 mm</option>
               <option value="3200">3200 mm</option>
@@ -153,7 +153,10 @@
 
           <!-- HoH plaatdragende profielen — eigen regel -->
           <div class="form-group form-group-span">
-            <label for="hoh-pd">HoH plaatdragende profielen (mm)</label>
+            <label for="hoh-pd">
+              HoH plaatdragende profielen (mm)
+              <span class="info-icon" title="0,30 kN/m² → hoh max 1000 mm  |  0,50 kN/m² → hoh max 750 mm">ⓘ</span>
+            </label>
             <input type="number" id="hoh-pd" value="400" min="100" max="1000" step="25" />
           </div>
 
@@ -161,7 +164,7 @@
           <div class="form-group form-group-span" id="hoh-basis-groep" style="display:none;">
             <label for="hoh-basis">
               HoH basisprofielen (mm)
-              <span class="info-icon" title="0,3 kN/m² → hoh 750 mm  |  0,5 kN/m² → hoh 600 mm">ⓘ</span>
+              <span class="info-icon" title="0,30 kN/m² → hoh max 750 mm  |  0,50 kN/m² → hoh max 600 mm">ⓘ</span>
             </label>
             <input type="number" id="hoh-basis" value="600" min="100" max="2000" step="25" />
           </div>
@@ -170,13 +173,13 @@
           <div class="form-group form-group-span">
             <label for="hoh-afhangers">
               HoH afhangers (mm)
-              <span class="info-icon" title="0,3 kN/m² → hoh 1000 mm  |  0,5 kN/m² → hoh 750 mm">ⓘ</span>
+              <span class="info-icon" title="0,30 kN/m² → hoh max 1000 mm  |  0,50 kN/m² → hoh max 750 mm">ⓘ</span>
             </label>
             <input type="number" id="hoh-afhangers" value="1000" min="300" max="2000" step="25" />
           </div>
 
-          <!-- Isolatie toggle + dikte op één regel -->
-          <div class="form-group">
+          <!-- Isolatie toggle -->
+          <div class="form-group form-group-span">
             <label>Isolatie</label>
             <div class="btn-group-compact">
               <button class="btn active" data-isolatie="nee" aria-pressed="true">Geen isolatie</button>
@@ -184,7 +187,7 @@
             </div>
           </div>
 
-          <div class="form-group" id="isolatie-dikte-groep" style="display:none;">
+          <div class="form-group form-group-span" id="isolatie-dikte-groep" style="display:none;">
             <label for="isolatie-dikte">Isolatiedikte (mm)</label>
             <select id="isolatie-dikte">
               <option value="45">45 mm</option>

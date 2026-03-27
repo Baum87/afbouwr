@@ -571,6 +571,12 @@ function vulGipsTypeSelects() {
 
   DOM.gipsType1().innerHTML = opties;
   DOM.gipsType2().innerHTML = opties;
+
+  const defaultType = 'standaard_4ak';
+  if ([...DOM.gipsType1().options].some(o => o.value === defaultType)) {
+    DOM.gipsType1().value = defaultType;
+    DOM.gipsType2().value = defaultType;
+  }
 }
 
 // ─── EVENTS ──────────────────────────────────────────────────────────────────

@@ -593,6 +593,10 @@ function triggerBerekening() {
 }
 
 // ─── TOEVOEGEN ──────────────────────────────────────────────────────────────
+function volgendeWandNaam() {
+  return `Wand ${String(state.wanden.length + 1).padStart(2, '0')}`;
+}
+
 function voegToe() {
   if (!state.berekening) return;
   const { inp, result } = state.berekening;
@@ -631,6 +635,7 @@ function voegToe() {
   state.wanden.push(wand);
   opslaan();
   renderAlles();
+  DOM.omschrijving().value = volgendeWandNaam();
   setStatus('✓ Toegevoegd!', 'ready');
   setTimeout(() => setStatus(''), 2000);
 }
@@ -1194,6 +1199,7 @@ function init() {
   laadOpgeslagen();
   renderAlles();
   initEvents();
+  DOM.omschrijving().value = volgendeWandNaam();
 }
 
 window.PRODUCTEN_READY.then(init);
